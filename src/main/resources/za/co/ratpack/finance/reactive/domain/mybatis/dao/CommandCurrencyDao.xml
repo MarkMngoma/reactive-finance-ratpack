@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="za.co.ratpack.finance.reactive.domain.mybatis.dao.CommandCurrencyDao">
+
+  <insert id="insert" parameterType="za.co.ratpack.finance.reactive.domain.mybatis.model.CurrencyEntityModel">
+    <selectKey keyProperty="id" keyColumn="ID" resultType="long" order="BEFORE">
+      SELECT NEXTVAL(dboFinance.CURRENCIES_SEQ)
+    </selectKey>
+    INSERT INTO dboFinance.CURRENCIES
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="currencyId != null">
+        CURRENCY_ID,
+      </if>
+      <if test="currencyCode != null">
+        CURRENCY_CODE,
+      </if>
+      <if test="currencyName != null">
+        CURRENCY_NAME,
+      </if>
+      <if test="currencySymbol != null">
+        CURRENCY_SYMBOL,
+      </if>
+      <if test="currencyFlag != null">
+        CURRENCY_FLAG,
+      </if>
+      <if test="archived != null">
+        ARCHIVED,
+      </if>
+      <if test="createdAt != null">
+        CREATED_AT,
+      </if>
+      <if test="createdBy != null">
+        CREATED_BY
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="currencyId != null">
+        #{currencyId,jdbcType=INTEGER},
+      </if>
+      <if test="currencyCode != null">
+        #{currencyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="currencyName != null">
+        #{currencyName,jdbcType=VARCHAR},
+      </if>
+      <if test="currencySymbol != null">
+        #{currencySymbol,jdbcType=VARCHAR},
+      </if>
+      <if test="currencyFlag != null">
+        #{currencyFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="archived != null">
+        #{archived,jdbcType=BIT},
+      </if>
+      <if test="createdAt != null">
+        #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createdBy != null">
+        #{createdBy,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="update" parameterType="za.co.ratpack.finance.reactive.domain.mybatis.model.CurrencyEntityModel">
+    UPDATE dboFinance.CURRENCIES
+    <set>
+      <if test="currencyId != null">
+        CURRENCY_ID = #{currencyId,jdbcType=INTEGER},
+      </if>
+      <if test="currencyCode != null">
+        CURRENCY_CODE = #{currencyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="currencyName != null">
+        CURRENCY_NAME = #{currencyName,jdbcType=VARCHAR},
+      </if>
+      <if test="currencySymbol != null">
+        CURRENCY_SYMBOL = #{currencySymbol,jdbcType=VARCHAR},
+      </if>
+      <if test="currencyFlag != null">
+        CURRENCY_FLAG = #{currencyFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="archived != null">
+        ARCHIVED = #{archived,jdbcType=BIT},
+      </if>
+      <if test="updatedAt != null">
+        UPDATED_AT = #{updatedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatedBy != null">
+        UPDATED_BY = #{updatedBy,jdbcType=INTEGER},
+      </if>
+    </set>
+    <include refid="wherePrimaryKeyEquals" />
+  </update>
+
+  <sql id="wherePrimaryKeyEquals">
+    WHERE ID = #{id,jdbcType=BIGINT}
+    AND ARCHIVED = 0;
+  </sql>
+
+</mapper>

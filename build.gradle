@@ -40,17 +40,25 @@ dependencies {
   implementation "io.ratpack:ratpack-core:${ratpackVersion}"
   implementation "io.ratpack:ratpack-guice:${ratpackVersion}"
   implementation "com.google.inject:guice:${googleGuiceVersion}"
+
+  // Logback Dependencies
   implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
   implementation "ch.qos.logback:logback-classic:${logbackVersion}"
   implementation "ch.qos.logback:logback-core:${logbackVersion}"
   implementation "ch.qos.logback:logback-parent:${logbackVersion}"
-  implementation "com.zaxxer:HikariCP:${hikariCPVersion}"
 
+  // Jakarta Dependencies
   implementation "jakarta.inject:jakarta.inject-api:${jakartaInjectApiVersion}"
   implementation "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}"
   implementation "jakarta.validation:jakarta.validation-api:${jakartaValidationVersion}"
-  implementation "org.apache.commons:commons-lang3:${apacheCommonsLang3Version}"
+  implementation "jakarta.el:jakarta.el-api:${jakartaElApiVersion}"
+  implementation "jakarta.xml.bind:jakarta.xml.bind-api:${jakartaXmlBindApiVersion}"
+  implementation "jakarta.activation:jakarta.activation-api:${jakartaActivationApiVersion}"
 
+  // Utility Dependencies
+  implementation "org.apache.commons:commons-lang3:${apacheCommonsLang3Version}"
+  implementation "com.neovisionaries:nv-i18n:${nvi18nVersion}"
+  implementation "org.modelmapper:modelmapper:${modelMapperVersion}"
   implementation "org.yaml:snakeyaml:${snakeYamlVersion}"
 
   compileOnly "org.projectlombok:lombok:${lombokVersion}"
@@ -59,6 +67,8 @@ dependencies {
   // Domain Dependencies
   implementation "org.mybatis:mybatis:${myBatisVersion}"
   implementation "org.mybatis:mybatis-guice:${myBatisGuiceVersion}"
+  implementation "org.mybatis.caches:mybatis-hazelcast:${myBatisHazelcastVersion}"
+  implementation "com.zaxxer:HikariCP:${hikariCPVersion}"
   implementation "org.mariadb.jdbc:mariadb-java-client:${jdbcMariadbVersion}"
   implementation "org.flywaydb:flyway-mysql:${flywayVersion}"
 
@@ -68,6 +78,7 @@ dependencies {
   testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
   testImplementation "io.ratpack:ratpack-test:${ratpackVersion}"
   testImplementation "commons-dbutils:commons-dbutils:${dbUtilsVersion}"
+  testImplementation "uk.org.webcompere:system-stubs-jupiter:${systemStubsVersion}"
 }
 
 ext {

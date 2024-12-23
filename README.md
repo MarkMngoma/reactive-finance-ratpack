@@ -22,12 +22,11 @@ You can find the complete Swagger spec for the API in the `spec.yaml` file. Here
 ```yaml
 openapi: 3.0.3
 info:
-  title: reactive-finance-ratpack
+  title: reactive-finance
   version: 1.0.0
   contact: {}
 servers:
   - url: https://localhost:5051
-  - url: https://proxy.rest.localhost.com/WSF
 paths:
   /v1/WriteCurrencyResource:
     post:
@@ -78,7 +77,7 @@ paths:
       responses:
         '200':
           description: ''
-  /v1/QueryCurrencyResource/exchanges:
+  /v1/QueryCurrencyResource/Exchanges/{currencyCode}:
     get:
       tags:
         - V1
@@ -88,6 +87,13 @@ paths:
       responses:
         '200':
           description: ''
+    parameters:
+      - name: currencyCode
+        in: path
+        required: true
+        schema:
+          type: string
+          example: ZAR
   /v1/QueryCurrencyResource/{currencyCode}:
     get:
       tags:
@@ -106,6 +112,187 @@ paths:
           type: string
           example: ZAR
         description: South African Rands
+  /v1/WriteBatchCurrencyResource:
+    post:
+      tags:
+        - V1
+      summary: /v1/WriteBatchCurrencyResource
+      description: /v1/WriteBatchCurrencyResource
+      operationId: v1Writebatchcurrencyresource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                batchCurrencies:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      currencyCode:
+                        type: string
+                        example: XOF
+                      currencyFlag:
+                        type: string
+                        example: 🇸🇳
+                      currencyId:
+                        type: number
+                        example: 952
+                      currencyName:
+                        type: string
+                        example: CFA Franc BCEAO (West African CFA franc)
+                      currencySymbol:
+                        type: string
+                        example: CFA
+                  example:
+                    - currencyCode: XOF
+                      currencyFlag: 🇸🇳
+                      currencyId: 952
+                      currencyName: CFA Franc BCEAO (West African CFA franc)
+                      currencySymbol: CFA
+                    - currencyCode: XAF
+                      currencyFlag: 🇨🇲
+                      currencyId: 950
+                      currencyName: CFA Franc BEAC (Central African CFA franc)
+                      currencySymbol: FCFA
+                    - currencyCode: ZAR
+                      currencyFlag: 🇿🇦
+                      currencyId: 710
+                      currencyName: South African Rand
+                      currencySymbol: R
+                    - currencyCode: NGN
+                      currencyFlag: 🇳🇬
+                      currencyId: 566
+                      currencyName: Nigerian Naira
+                      currencySymbol: ₦
+                    - currencyCode: KES
+                      currencyFlag: 🇰🇪
+                      currencyId: 404
+                      currencyName: Kenyan Shilling
+                      currencySymbol: KSh
+                    - currencyCode: UGX
+                      currencyFlag: 🇺🇬
+                      currencyId: 800
+                      currencyName: Ugandan Shilling
+                      currencySymbol: USh
+                    - currencyCode: GHS
+                      currencyFlag: 🇬🇭
+                      currencyId: 936
+                      currencyName: Ghanaian Cedi
+                      currencySymbol: ₵
+                    - currencyCode: TZS
+                      currencyFlag: 🇹🇿
+                      currencyId: 834
+                      currencyName: Tanzanian Shilling
+                      currencySymbol: TSh
+                    - currencyCode: ZMW
+                      currencyFlag: 🇿🇲
+                      currencyId: 967
+                      currencyName: Zambian Kwacha
+                      currencySymbol: ZK
+                    - currencyCode: BWP
+                      currencyFlag: 🇧🇼
+                      currencyId: 58
+                      currencyName: Botswana Pula
+                      currencySymbol: P
+                    - currencyCode: SCR
+                      currencyFlag: 🇸🇨
+                      currencyId: 690
+                      currencyName: Seychellois Rupee
+                      currencySymbol: ₨
+                    - currencyCode: NAD
+                      currencyFlag: 🇳🇦
+                      currencyId: 516
+                      currencyName: Namibian Dollar
+                      currencySymbol: $
+                    - currencyCode: MUR
+                      currencyFlag: 🇲🇺
+                      currencyId: 480
+                      currencyName: Mauritian Rupee
+                      currencySymbol: ₨
+                    - currencyCode: MWK
+                      currencyFlag: 🇲🇼
+                      currencyId: 454
+                      currencyName: Malawian Kwacha
+                      currencySymbol: MK
+                    - currencyCode: GMD
+                      currencyFlag: 🇬🇲
+                      currencyId: 270
+                      currencyName: Gambian Dalasi
+                      currencySymbol: D
+                    - currencyCode: SZL
+                      currencyFlag: 🇸🇿
+                      currencyId: 748
+                      currencyName: Swazi Lilangeni (Swaziland)
+                      currencySymbol: E
+                    - currencyCode: RWF
+                      currencyFlag: 🇷🇼
+                      currencyId: 646
+                      currencyName: Rwandan Franc
+                      currencySymbol: RF
+            examples:
+              /v1/WriteBatchCurrencyResource:
+                value:
+                  batchCurrencies:
+                    - currencyCode: ZAR
+                      currencyFlag: 🇿🇦
+                      currencyId: 710
+                      currencyName: South African Rand
+                      currencySymbol: R
+                    - currencyCode: USD
+                      currencyFlag: 🇺🇸
+                      currencyId: 840
+                      currencyName: United States Dollar
+                      currencySymbol: $
+                    - currencyCode: GBP
+                      currencyFlag: 🇬🇧
+                      currencyId: 826
+                      currencyName: British Pound Sterling
+                      currencySymbol: £
+                    - currencyCode: AED
+                      currencyFlag: 🇦🇪
+                      currencyId: 784
+                      currencyName: United Arab Emirates Dirham
+                      currencySymbol: د.إ
+                    - currencyCode: SAR
+                      currencyFlag: 🇸🇦
+                      currencyId: 682
+                      currencyName: Saudi Riyal
+                      currencySymbol: ر.س
+                    - currencyCode: KWD
+                      currencyFlag: 🇰🇼
+                      currencyId: 414
+                      currencyName: Kuwaiti Dinar
+                      currencySymbol: د.ك
+                    - currencyCode: QAR
+                      currencyFlag: 🇶🇦
+                      currencyId: 634
+                      currencyName: Qatari Riyal
+                      currencySymbol: ر.ق
+                    - currencyCode: OMR
+                      currencyFlag: 🇴🇲
+                      currencyId: 512
+                      currencyName: Omani Rial
+                      currencySymbol: ر.ع
+                    - currencyCode: BHD
+                      currencyFlag: 🇧🇭
+                      currencyId: 48
+                      currencyName: Bahraini Dinar
+                      currencySymbol: ب.د
+                    - currencyCode: ILS
+                      currencyFlag: 🇮🇱
+                      currencyId: 376
+                      currencyName: Israeli New Shekel
+                      currencySymbol: ₪
+                    - currencyCode: TRY
+                      currencyFlag: 🇹🇷
+                      currencyId: 949
+                      currencyName: Turkish Lira
+                      currencySymbol: ₺
+      responses:
+        '200':
+          description: ''
 tags:
   - name: V1
 ```

@@ -35,10 +35,8 @@ public class ServerCommand {
 
   private static final Logger LOG = LoggerFactory.getLogger(ServerCommand.class);
 
-  public static final String MDC_REQUEST_TAG = "aRequestTag";
-
   protected void run() throws Exception {
-    MDC.put(MDC_REQUEST_TAG, UUID.randomUUID().toString());
+    MDC.put("requestId", UUID.randomUUID().toString());
     StopWatch stopwatch = new StopWatch();
 
     if (LOG.isInfoEnabled()) {
