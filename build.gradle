@@ -1,0 +1,105 @@
+buildscript {
+  repositories {
+    gradlePluginPortal()
+  }
+  repositories {
+    mavenCentral()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+
+  dependencies {
+    classpath "com.github.johnrengelman:shadow:${shadowJarVersion}"
+  }
+}
+
+plugins {
+  id 'java'
+  id "application"
+  id 'com.github.johnrengelman.shadow' version "${shadowJarVersion}"
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: "java"
+apply plugin: 'application'
+
+group = 'za.co.ratpack.finance.reactive'
+description = 'A Java boilerplate reactive financial server using Google Guice'
+version = "${reactiveServerVersion}"
+
+repositories {
+  mavenCentral()
+  maven {
+    url "https://plugins.gradle.org/m2/"
+  }
+}
+
+dependencies {
+  // Server Dependencies
+  implementation "io.ratpack:ratpack-core:${ratpackVersion}"
+  implementation "io.ratpack:ratpack-guice:${ratpackVersion}"
+  implementation "com.google.inject:guice:${googleGuiceVersion}"
+  implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
+  implementation "ch.qos.logback:logback-classic:${logbackVersion}"
+  implementation "ch.qos.logback:logback-core:${logbackVersion}"
+  implementation "ch.qos.logback:logback-parent:${logbackVersion}"
+  implementation "com.zaxxer:HikariCP:${hikariCPVersion}"
+
+  implementation "jakarta.inject:jakarta.inject-api:${jakartaInjectApiVersion}"
+  implementation "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}"
+  implementation "jakarta.validation:jakarta.validation-api:${jakartaValidationVersion}"
+  implementation "org.apache.commons:commons-lang3:${apacheCommonsLang3Version}"
+
+  implementation "org.yaml:snakeyaml:${snakeYamlVersion}"
+
+  compileOnly "org.projectlombok:lombok:${lombokVersion}"
+  annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+  // Domain Dependencies
+  implementation "org.mybatis:mybatis:${myBatisVersion}"
+  implementation "org.mybatis:mybatis-guice:${myBatisGuiceVersion}"
+  implementation "org.mariadb.jdbc:mariadb-java-client:${jdbcMariadbVersion}"
+  implementation "org.flywaydb:flyway-mysql:${flywayVersion}"
+
+  // Test Dependencies
+  testImplementation platform("org.junit:junit-bom:${junitJupiterVersion}")
+  testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
+  testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+  testImplementation "io.ratpack:ratpack-test:${ratpackVersion}"
+  testImplementation "commons-dbutils:commons-dbutils:${dbUtilsVersion}"
+}
+
+ext {
+  javaMainClass = "${mainClass}"
+}
+
+application {
+  mainClassName = javaMainClass
+}
+
+run.doFirst {
+  environment 'RATPACK_ENVIRONMENT', "${environmentVar}"
+}
+
+jar {
+  manifest {
+    attributes(
+      "Manifest-Version": "1.0",
+      'Main-Class': "${mainClass}"
+    )
+  }
+}
+
+shadowJar {
+  zip64 true
+  mergeServiceFiles()
+  exclude "META-INF/*.SF"
+  exclude 'META-INF/*.DSA'
+  exclude 'META-INF/*.RSA'
+  exclude "LICENSE*"
+}
+
+test {
+  useJUnitPlatform()
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <withJansi>false</withJansi>
+    <encoder>
+      <Pattern>%yellow(%d) %highlight(%-5level) %magenta([%thread]) %green(MDC=%X{requestId})  %cyan(%logger{90}) ---> %msg%n%throwable</Pattern>
+    </encoder>
+  </appender>
+
+  <appender name="asyncConsole" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="console" />
+    <queueSize>512</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+    <neverBlock>true</neverBlock>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="asyncConsole" />
+  </root>
+
+  <logger name="com.ibatis" level="TRACE" additivity="true" />
+  <logger name="za.co" level="TRACE" additivity="true" />
+  <logger name="org.mybatis" level="TRACE" additivity="true" />
+  <logger name="org.flywaydb" level="INFO" additivity="true" />
+  <logger name="ratpack" level="INFO" additivity="true" />
+</configuration>

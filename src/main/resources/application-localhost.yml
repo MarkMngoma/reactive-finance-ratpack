@@ -1,0 +1,26 @@
+server:
+  defaultPort: 5051
+  allowedOrigins: '*'
+  allowedMethods: 'GET, POST, DELETE, PUT, PATCH, TRACE'
+  allowedHeaders: Origin, Content-Type, Accept, Authorization, X-localization, Proxy-Authorization
+
+jdbc:
+  url: jdbc:mariadb://localhost:63306/dboFinance
+  driverClassName: org.mariadb.jdbc.Driver
+  username: dboFinance
+  password: mdn9VBYldGcmLo01lt5Y3lpQqeE=
+  autoCommit: true
+  allowPoolSuspension: true
+  loginTimeout: 30000
+  connectionTimeoutMs: 30000
+  idleTimeoutMs: 600000
+  maxLifetimeMs: 18000000
+  mapperPackage: za.co.ratpack.finance.reactive.domain.mybatis.dao
+  flywaySchema: dboFinance
+  migrationsTable: MIGRATION_SCHEMAS_HISTORY
+  validateOnMigrationNaming: true
+  validateOnMigrate: true
+  createSchemas: false
+  cleanDisabled: true
+  baselineOnMigrate: true
+  migrationLocation: db/migration
