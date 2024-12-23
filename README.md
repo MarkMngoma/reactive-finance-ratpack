@@ -378,7 +378,7 @@ The project uses **Docker** for containerization. To run the application in a co
 
 The project includes integration tests to ensure that everything is functioning as expected.
 
-1. **Run Tests Using .NET CLI:**
+1. **Run Tests Using Gradle CLI:**
 
    To run the integration tests, use the following command:
 
