@@ -22,7 +22,7 @@ You can find the complete Swagger spec for the API in the `spec.yaml` file. Here
 ```yaml
 openapi: 3.0.3
 info:
-  title: reactive-finance
+  title: reactive-finance-ratpack
   version: 1.0.0
   contact: {}
 servers:
