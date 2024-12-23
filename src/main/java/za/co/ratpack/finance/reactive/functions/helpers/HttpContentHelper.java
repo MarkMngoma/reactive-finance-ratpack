@@ -1,7 +1,5 @@
 package za.co.ratpack.finance.reactive.functions.helpers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -24,13 +22,6 @@ import java.util.Set;
 @Slf4j
 @Singleton
 public class HttpContentHelper {
-
-  private final ObjectMapper objectMapper;
-
-  @Inject
-  public HttpContentHelper(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
-  }
 
   public <T> Promise<T> parseJson(Context ctx, Class<T> clazz) {
     return ctx.parse(Jackson.fromJson(clazz));

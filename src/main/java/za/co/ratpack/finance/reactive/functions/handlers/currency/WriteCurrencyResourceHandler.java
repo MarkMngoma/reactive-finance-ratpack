@@ -35,7 +35,7 @@ public class WriteCurrencyResourceHandler implements Handler {
   }
 
   @Override
-  public void handle(Context ctx) throws Exception {
+  public void handle(Context ctx) {
     log.info("WriteCurrencyResourceHandler@handle initiated with :: [{}]", ctx.getRequest().getPath());
     this.httpContentHelper.parseJson(ctx, CurrencyRequest.class)
       .apply(currencyRequestPromise -> this.httpContentHelper.validate(ctx, currencyRequestPromise))
