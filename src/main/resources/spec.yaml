@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: reactive-finance
+  title: reactive-finance-ratpack
   version: 1.0.0
   contact: {}
 servers:
