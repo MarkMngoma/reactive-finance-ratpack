@@ -24,4 +24,5 @@
   <logger name="org.mybatis" level="TRACE" additivity="true" />
   <logger name="org.flywaydb" level="INFO" additivity="true" />
   <logger name="ratpack" level="INFO" additivity="true" />
+  <logger name="com.hazelcast" level="TRACE" additivity="true" />
 </configuration>

@@ -9,7 +9,7 @@ import java.util.List;
  * @author markmngoma
  * @created at 22:12 on 22/12/2024
  */
-public interface BatchMapper {
+public interface BatchDao {
   @Flush
   List<BatchResult> flushBatchedStatements();
 }

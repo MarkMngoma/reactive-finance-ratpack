@@ -13,12 +13,15 @@ import com.google.inject.Singleton;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.slf4j.MDC;
 import ratpack.error.ClientErrorHandler;
 import ratpack.error.ServerErrorHandler;
-import ratpack.error.internal.DefaultProductionErrorHandler;
 import ratpack.handling.RequestId;
 import ratpack.logging.MDCInterceptor;
+import za.co.ratpack.finance.reactive.domain.flyway.FlywayMigratorService;
+import za.co.ratpack.finance.reactive.functions.handlers.GlobalErrorHandler;
 import za.co.ratpack.finance.reactive.rest.v1.action.FinanceActionChain;
 
 import java.text.SimpleDateFormat;
@@ -39,9 +42,10 @@ public class ServerModule extends AbstractModule {
   protected void configure() {
     TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.UTC));
 
-    bind(ClientErrorHandler.class).to(DefaultProductionErrorHandler.class);
-    bind(ServerErrorHandler.class).to(DefaultProductionErrorHandler.class);
+    bind(ClientErrorHandler.class).to(GlobalErrorHandler.class);
+    bind(ServerErrorHandler.class).to(GlobalErrorHandler.class);
 
+    bind(FlywayMigratorService.class);
     bind(FinanceActionChain.class);
   }
 
@@ -60,6 +64,14 @@ public class ServerModule extends AbstractModule {
       .messageInterpolator(new ParameterMessageInterpolator())
       .buildValidatorFactory()
       .getValidator();
+  }
+
+  @Provides
+  @Singleton
+  public ModelMapper modelMapper() {
+    ModelMapper modelMapper = new ModelMapper();
+    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+    return modelMapper;
   }
 
   @Provides

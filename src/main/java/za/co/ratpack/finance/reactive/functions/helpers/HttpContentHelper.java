@@ -1,5 +1,7 @@
 package za.co.ratpack.finance.reactive.functions.helpers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -23,7 +25,14 @@ import java.util.Set;
 @Singleton
 public class HttpContentHelper {
 
-  public <T> Promise<T> parseJson(Class<T> clazz, Context ctx) {
+  private final ObjectMapper objectMapper;
+
+  @Inject
+  public HttpContentHelper(ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
+  }
+
+  public <T> Promise<T> parseJson(Context ctx, Class<T> clazz) {
     return ctx.parse(Jackson.fromJson(clazz));
   }
 
@@ -32,16 +41,11 @@ public class HttpContentHelper {
     ctx.render(Jackson.json(response));
   }
 
-  public Optional<String> parsePathVariable(Context ctx, final String pathVariable) {
+  public String parsePathVariable(Context ctx, final String pathVariable) {
     return Optional.ofNullable(pathVariable)
       .filter(pathToken -> ctx.getPathBinding().getTokens().containsKey(pathVariable))
-      .map(pathToken -> ctx.getPathBinding().getTokens().get(pathVariable));
-  }
-
-  public Optional<String> parseQueryParameter(Context ctx, final String aQueryParameter) {
-    return Optional.ofNullable(aQueryParameter)
-      .filter(pathQuery -> !ctx.getRequest().getQueryParams().isEmpty())
-      .map(pathQuery -> ctx.getRequest().getQueryParams().get(aQueryParameter));
+      .map(pathToken -> ctx.getPathBinding().getTokens().get(pathVariable))
+      .orElseThrow(() -> new RuntimeException("Invalid path variable: " + pathVariable));
   }
 
   public <T> Promise<T> validate(Context ctx, Promise<T> promise) {

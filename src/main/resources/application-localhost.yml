@@ -3,7 +3,7 @@ server:
   allowedOrigins: '*'
   allowedMethods: 'GET, POST, DELETE, PUT, PATCH, TRACE'
   allowedHeaders: Origin, Content-Type, Accept, Authorization, X-localization, Proxy-Authorization
-
+  contentType: 'application/json'
 jdbc:
   url: jdbc:mariadb://localhost:63306/dboFinance
   driverClassName: org.mariadb.jdbc.Driver
