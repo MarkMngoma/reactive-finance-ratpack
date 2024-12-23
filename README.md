@@ -415,7 +415,7 @@ The project includes integration tests to ensure that everything is functioning 
 - **Description**: Retrieve all currency resources.
 - **Response**: List of all currencies.
 
-### 3. **GET /v1/QueryCurrencyResource/exchanges**
+### 3. **GET /v1/QueryCurrencyResource/Exchanges/{currencyCode}**
 
 - **Description**: Retrieve the latest exchange rates for all currencies.
 
