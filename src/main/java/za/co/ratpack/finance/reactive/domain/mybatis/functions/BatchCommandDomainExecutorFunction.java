@@ -27,48 +27,45 @@ public class BatchCommandDomainExecutorFunction {
   private static final Logger LOG = LoggerFactory.getLogger(BatchCommandDomainExecutorFunction.class);
 
   @Transactional(executorType = ExecutorType.BATCH, isolation = Isolation.READ_UNCOMMITTED)
-  public <T, R extends BatchDao> void batchInsertCommand(final Function<T, ?> mapperFunction, final R mapperInstance, final Collection<T> batchEntries) throws SQLDataException {
-    LOG.info("BatchCommandDomainExecutorFunction@insertBatch executed for #{} entries", batchEntries.size());
+  public <T, R extends BatchDao> void executeBatchCommand(final Function<T, ?> mapperFunction, final R mapperInstance, final Collection<T> batchEntries) throws SQLDataException {
+    LOG.info("BatchCommandDomainExecutorFunction@executeBatchCommand executed for #{} entries", batchEntries.size());
     try {
-        MDC.setContextMap(MDC.getCopyOfContextMap());
+      MDC.setContextMap(MDC.getCopyOfContextMap());
 
-        if (mapperFunction == null) {
-          throw new SQLDataException("PreparedStatement.batchFunctionalFlush failed to pull mapper function.");
-        }
-        if (mapperInstance == null) {
-          throw new SQLDataException("PreparedStatement.batchFunctionalFlush failed to locate mapper instance.");
-        }
-
-        int counter = 0;
-        StopWatch stopwatch = new StopWatch();
-
-        if (LOG.isInfoEnabled()) {
-          stopwatch.start();
-        }
-
-        for (T entry : batchEntries) {
-          mapperFunction.apply(entry);
-
-          if (LOG.isDebugEnabled() && ++counter % 100 == 0) {
-            LOG.debug("{} records processed for {}", counter, mapperFunction.toString());
-          }
-        }
-
-        LOG.debug("{} records processed for {}", counter, mapperFunction.toString());
-        List<BatchResult> results = mapperInstance.flushBatchedStatements();
-
-        if (LOG.isInfoEnabled()) {
-          stopwatch.stop();
-          LOG.info("[{}] ms and [{}] seconds for BATCH {}",
-            stopwatch.getTime(TimeUnit.MILLISECONDS),
-            stopwatch.getTime(TimeUnit.SECONDS),
-            mapperFunction.toString());
-        }
-
-      } catch (Exception e) {
-        LOG.error("Batch call {} failed {}", mapperFunction, e.getMessage());
-        throw new SQLDataException(e.getMessage());
+      if (mapperFunction == null) {
+        throw new SQLDataException("BatchCommandDomainExecutorFunction@executeBatchCommand mapper function not supplied.");
       }
+      if (mapperInstance == null) {
+        throw new SQLDataException("BatchCommandDomainExecutorFunction@executeBatchCommand mapper instance not located or supplied.");
+      }
+
+      int counter = 0;
+      StopWatch stopwatch = new StopWatch();
+
+      if (LOG.isInfoEnabled()) {
+        stopwatch.start();
+      }
+
+      for (T entry : batchEntries) {
+        mapperFunction.apply(entry);
+
+        if (LOG.isDebugEnabled() && ++counter % 100 == 0) {
+          LOG.debug("BatchCommandDomainExecutorFunction@executeBatchCommand {} records processed for {}", counter, mapperFunction.toString());
+        }
+      }
+
+      List<BatchResult> results = mapperInstance.flushBatchedStatements();
+      LOG.debug("BatchCommandDomainExecutorFunction@executeBatchCommand {} records processed for {} batch result :: {}", counter, mapperFunction.toString(), results);
+
+      if (LOG.isInfoEnabled()) {
+        stopwatch.stop();
+        LOG.info("[{}] ms and [{}] seconds for BATCH {}", stopwatch.getTime(TimeUnit.MILLISECONDS), stopwatch.getTime(TimeUnit.SECONDS), mapperFunction.toString());
+      }
+
+    } catch (Exception e) {
+      LOG.error("BatchCommandDomainExecutorFunction@executeBatchCommand call {} failed {}", mapperFunction, e.getMessage());
+      throw new SQLDataException(e.getMessage());
+    }
   }
 
 }

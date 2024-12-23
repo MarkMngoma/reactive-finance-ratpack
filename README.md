@@ -378,7 +378,7 @@ The project uses **Docker** for containerization. To run the application in a co
 
 The project includes integration tests to ensure that everything is functioning as expected.
 
-1. **Run Tests Using .NET CLI:**
+1. **Run Tests Using Gradle CLI:**
 
    To run the integration tests, use the following command:
 
@@ -415,7 +415,7 @@ The project includes integration tests to ensure that everything is functioning 
 - **Description**: Retrieve all currency resources.
 - **Response**: List of all currencies.
 
-### 3. **GET /v1/QueryCurrencyResource/exchanges**
+### 3. **GET /v1/QueryCurrencyResource/Exchanges/{currencyCode}**
 
 - **Description**: Retrieve the latest exchange rates for all currencies.
 
