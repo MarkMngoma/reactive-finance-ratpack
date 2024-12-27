@@ -23,6 +23,7 @@ plugins {
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: "java"
 apply plugin: 'application'
+apply from: "${projectDir}/src/gradle/scripts/mybatis.gradle"
 
 group = 'za.co.ratpack.finance.reactive'
 description = 'A Java boilerplate reactive financial server using Google Guice'
