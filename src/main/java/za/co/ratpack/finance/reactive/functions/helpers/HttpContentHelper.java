@@ -36,7 +36,7 @@ public class HttpContentHelper {
     return Optional.ofNullable(pathVariable)
       .filter(pathToken -> ctx.getPathBinding().getTokens().containsKey(pathVariable))
       .map(pathToken -> ctx.getPathBinding().getTokens().get(pathVariable))
-      .orElseThrow(() -> new RuntimeException("Invalid path variable: " + pathVariable));
+      .orElseThrow(() -> new IllegalArgumentException("Invalid path variable: " + pathVariable));
   }
 
   public <T> Promise<T> validate(Context ctx, Promise<T> promise) {

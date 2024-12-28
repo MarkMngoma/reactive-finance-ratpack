@@ -34,11 +34,14 @@ public class GlobalErrorHandler implements ErrorHandler {
   public void error(Context context, Throwable throwable) throws Exception {
    log.error("GlobalErrorHandler@error with :: [{}]", throwable.getMessage());
     var throwableResponse = new ImmutableMap.Builder<String, Object>()
-      .put("error", "Service failure on request")
-      .put("message", "Request could not be satisfied")
-      .build();
-
-    context.getResponse().status(Status.NOT_ACCEPTABLE);
+      .put("error", "Service failure on request");
+    if (throwable instanceof IllegalArgumentException illegalArgumentException) {
+      throwableResponse.put("message", illegalArgumentException.getLocalizedMessage());
+      context.getResponse().status(Status.BAD_REQUEST);
+    } else {
+      throwableResponse.put("message", "Request could not be satisfied");
+      context.getResponse().status(Status.NOT_ACCEPTABLE);
+    }
     context.getResponse().contentType(MediaType.APPLICATION_JSON);
     context.getResponse().send(mapper.writeValueAsString(throwableResponse));
   }

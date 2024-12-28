@@ -26,7 +26,7 @@ public class BatchCommandDomainExecutorFunction {
 
   private static final Logger LOG = LoggerFactory.getLogger(BatchCommandDomainExecutorFunction.class);
 
-  @Transactional(executorType = ExecutorType.BATCH, isolation = Isolation.READ_UNCOMMITTED)
+  @Transactional(executorType = ExecutorType.BATCH, isolation = Isolation.READ_UNCOMMITTED, rollbackOnly = true)
   public <T, R extends BatchDao> void executeBatchCommand(final Function<T, ?> mapperFunction, final R mapperInstance, final Collection<T> batchEntries) throws SQLDataException {
     LOG.info("BatchCommandDomainExecutorFunction@executeBatchCommand executed for #{} entries", batchEntries.size());
     try {
