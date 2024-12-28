@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
 
     - name: Set up Docker Compose
       uses: hoverkraft-tech/compose-action@v2.0.1
