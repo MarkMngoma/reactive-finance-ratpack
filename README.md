@@ -1,3 +1,5 @@
+[![Java CI with Gradle](https://github.com/MarkMngoma/reactive-finance-ratpack/actions/workflows/gradle.yml/badge.svg)](https://github.com/MarkMngoma/reactive-finance-ratpack/actions/workflows/gradle.yml)
+
 # 🏦 **Reactive Ratpack Finance API** 🚀
 
 Welcome to the **Reactive Ratpack Finance** API! This is a powerful API for managing and querying currency resources with cutting-edge features built using **Ratpack (Java 17) and Google Guice**.
