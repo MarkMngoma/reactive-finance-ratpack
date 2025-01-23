@@ -5,7 +5,7 @@ buildscript {
   repositories {
     mavenCentral()
     maven {
-      url "https://plugins.gradle.org/m2/"
+      url "${mavenRepository}"
     }
   }
 
@@ -32,7 +32,7 @@ version = "${reactiveServerVersion}"
 repositories {
   mavenCentral()
   maven {
-    url "https://plugins.gradle.org/m2/"
+    url "${mavenRepository}"
   }
 }
 
@@ -44,7 +44,6 @@ dependencies {
   implementation "io.netty:netty-all:${nettyVersion}"
 
   // Logback Dependencies
-  implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
   implementation "ch.qos.logback:logback-classic:${logbackVersion}"
   implementation "ch.qos.logback:logback-core:${logbackVersion}"
   implementation "ch.qos.logback:logback-parent:${logbackVersion}"
