@@ -115,6 +115,25 @@ docker compose -f docker-compose-docs.yml down
 
 ## Troubleshooting
 
+### "Document 'api-1' could not be loaded" Error
+
+If you see this error in Scalar UI:
+
+**Cause**: The OpenAPI spec URL in `index.html` doesn't match the serving context.
+
+**Solution**: 
+- For Ratpack integration (`/api-docs`): Ensure `src/main/resources/api-docs/index.html` uses `url: '/api-docs/openapi.yaml'`
+- For Docker Compose (root): Ensure `src/test/resources/spec/index.html` uses `url: '/openapi.yaml'`
+
+Verify the spec is accessible:
+```bash
+# For Ratpack
+curl http://localhost:5051/api-docs/openapi.yaml
+
+# For Docker Compose
+curl http://localhost:8080/openapi.yaml
+```
+
 ### Documentation Not Loading
 
 If the documentation doesn't load:
