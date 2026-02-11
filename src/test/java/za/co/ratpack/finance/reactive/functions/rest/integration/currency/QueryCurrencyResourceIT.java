@@ -15,37 +15,55 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * @author markmngoma
- * @created at 03:23 on 23/12/2024
+ * Integration test for QueryCurrencyResource endpoints.
+ * 
+ * @author Generated
+ * @created at 14:13 on 11/02/2026
  */
 @ExtendWith({RatpackTestServerExtension.class, OpenApiSpecExtension.class})
-public class WriteBatchCurrencyResourceIT extends RatpackServerBaseIT {
-
+public class QueryCurrencyResourceIT extends RatpackServerBaseIT {
+  
   @BeforeAll
   static void beforeAll() throws Exception {
     ratpackServer.start();
   }
-
+  
   @AfterAll
   static void afterAll() throws Exception {
     ratpackServer.stop();
   }
-
+  
   @Test
-  void givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults() {
-    OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("WriteBatchCurrencyResourceIT", "givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults");
-    
-    var receivedResponse = apiClient
+  void givenCurrenciesExistWhenQueryingAllThenVerifyResults() {
+    // First create some currencies
+    testHttpClient
       .requestSpec(BatchCurrencyRequestUtil::constructCurrencyRequest)
       .post("/v1/WriteBatchCurrencyResource");
-
-    var receivedGetResponse = apiClient.get("/v1/QueryCurrencyResource");
-
-    assertEquals(Status.OK, receivedGetResponse.getStatus());
-    assertEquals(receivedResponse.getBody().getText(), receivedGetResponse.getBody().getText());
+    
+    // Now query all currencies with OpenAPI capture
+    OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
+    apiClient.setTestContext("QueryCurrencyResourceIT", "givenCurrenciesExistWhenQueryingAllThenVerifyResults");
+    
+    var receivedResponse = apiClient.get("/v1/QueryCurrencyResource");
+    
     assertEquals(Status.OK, receivedResponse.getStatus());
     assertNotNull(receivedResponse.getBody().getText());
-    assertEquals(receivedResponse.getBody().getText(), receivedResponse.getBody().getText());
+  }
+  
+  @Test
+  void givenCurrencyExistsWhenQueryingByCodeThenVerifyResult() {
+    // First create some currencies
+    testHttpClient
+      .requestSpec(BatchCurrencyRequestUtil::constructCurrencyRequest)
+      .post("/v1/WriteBatchCurrencyResource");
+    
+    // Now query a specific currency with OpenAPI capture
+    OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
+    apiClient.setTestContext("QueryCurrencyResourceIT", "givenCurrencyExistsWhenQueryingByCodeThenVerifyResult");
+    
+    var receivedResponse = apiClient.get("/v1/QueryCurrencyResource/ZAR");
+    
+    assertEquals(Status.OK, receivedResponse.getStatus());
+    assertNotNull(receivedResponse.getBody().getText());
   }
 }

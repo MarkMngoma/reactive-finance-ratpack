@@ -29,7 +29,8 @@ public class OpenApiTestHttpClient {
   private final OpenApiCapture capture;
   private String testClassName;
   private String testMethodName;
-  private RequestSpec currentRequestSpec;
+  private String lastRequestBody;
+  private String lastRequestContentType;
   
   public OpenApiTestHttpClient(TestHttpClient delegate) {
     this.delegate = delegate;
@@ -46,10 +47,22 @@ public class OpenApiTestHttpClient {
   
   /**
    * Supports requestSpec() chaining like TestHttpClient.
+   * Wraps the consumer to capture request body and headers.
    */
   public OpenApiTestHttpClient requestSpec(Consumer<RequestSpec> requestSpec) {
-    delegate.requestSpec(requestSpec);
+    delegate.requestSpec(spec -> {
+      // Wrap to capture request body
+      requestSpec.accept(new RequestSpecCapture(spec, this));
+    });
     return this;
+  }
+  
+  /**
+   * Sets the captured request body for the next request.
+   */
+  void setLastRequestBody(String body, String contentType) {
+    this.lastRequestBody = body;
+    this.lastRequestContentType = contentType;
   }
   
   /**
@@ -57,7 +70,8 @@ public class OpenApiTestHttpClient {
    */
   public ReceivedResponse get(String path) {
     ReceivedResponse response = delegate.get(path);
-    captureInteraction("GET", path, null, null, response);
+    captureInteraction("GET", path, response);
+    clearRequestState();
     return response;
   }
   
@@ -66,7 +80,8 @@ public class OpenApiTestHttpClient {
    */
   public ReceivedResponse post(String path) {
     ReceivedResponse response = delegate.post(path);
-    captureInteraction("POST", path, null, null, response);
+    captureInteraction("POST", path, response);
+    clearRequestState();
     return response;
   }
   
@@ -75,7 +90,8 @@ public class OpenApiTestHttpClient {
    */
   public ReceivedResponse put(String path) {
     ReceivedResponse response = delegate.put(path);
-    captureInteraction("PUT", path, null, null, response);
+    captureInteraction("PUT", path, response);
+    clearRequestState();
     return response;
   }
   
@@ -84,7 +100,8 @@ public class OpenApiTestHttpClient {
    */
   public ReceivedResponse delete(String path) {
     ReceivedResponse response = delegate.delete(path);
-    captureInteraction("DELETE", path, null, null, response);
+    captureInteraction("DELETE", path, response);
+    clearRequestState();
     return response;
   }
   
@@ -93,17 +110,25 @@ public class OpenApiTestHttpClient {
    */
   public ReceivedResponse patch(String path) {
     ReceivedResponse response = delegate.patch(path);
-    captureInteraction("PATCH", path, null, null, response);
+    captureInteraction("PATCH", path, response);
+    clearRequestState();
     return response;
+  }
+  
+  /**
+   * Clears request state after a request.
+   */
+  private void clearRequestState() {
+    lastRequestBody = null;
+    lastRequestContentType = null;
   }
   
   /**
    * Captures the HTTP interaction.
    */
-  private void captureInteraction(String method, String path, String requestBody, 
-                                   String requestContentType, ReceivedResponse response) {
+  private void captureInteraction(String method, String path, ReceivedResponse response) {
     try {
-      // Extract request information from delegate if available
+      // Extract request information
       Map<String, String> requestHeaders = new HashMap<>();
       Map<String, String> responseHeaders = new HashMap<>();
       
@@ -115,24 +140,13 @@ public class OpenApiTestHttpClient {
       // Normalize the path for OpenAPI
       String normalizedPath = normalizePath(path);
       
-      // Try to get request body if the method supports it
-      String actualRequestBody = requestBody;
-      String actualRequestContentType = requestContentType;
-      
-      // For POST, PUT, PATCH we should capture the request body
-      // The delegate's internal state might have this, but we'll capture what we can
-      if (method.equals("POST") || method.equals("PUT") || method.equals("PATCH")) {
-        // Request body would need to be captured before the call
-        // For now, we'll leave it as is and enhance later if needed
-      }
-      
       CapturedInteraction interaction = CapturedInteraction.builder()
         .method(method)
         .requestPath(path)
         .normalizedPath(normalizedPath)
         .requestHeaders(requestHeaders)
-        .requestContentType(actualRequestContentType)
-        .requestBody(actualRequestBody)
+        .requestContentType(lastRequestContentType)
+        .requestBody(lastRequestBody)
         .responseStatusCode(response.getStatusCode())
         .responseHeaders(responseHeaders)
         .responseContentType(response.getHeaders().get("Content-Type"))
@@ -194,5 +208,114 @@ public class OpenApiTestHttpClient {
    */
   public TestHttpClient getDelegate() {
     return delegate;
+  }
+}
+
+/**
+ * Wrapper for RequestSpec that captures request body and content type.
+ */
+class RequestSpecCapture implements RequestSpec {
+  
+  private final RequestSpec delegate;
+  private final OpenApiTestHttpClient client;
+  
+  RequestSpecCapture(RequestSpec delegate, OpenApiTestHttpClient client) {
+    this.delegate = delegate;
+    this.client = client;
+  }
+  
+  @Override
+  public ratpack.http.MutableHeaders getHeaders() {
+    return delegate.getHeaders();
+  }
+  
+  @Override
+  public RequestSpec headers(ratpack.func.Action<? super ratpack.http.MutableHeaders> action) throws Exception {
+    return delegate.headers(action);
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec method(String method) {
+    return delegate.method(method);
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec method(io.netty.handler.codec.http.HttpMethod method) {
+    return delegate.method(method);
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec decompressResponse(boolean shouldDecompress) {
+    return delegate.decompressResponse(shouldDecompress);
+  }
+  
+  @Override
+  public java.net.URI getUri() {
+    return delegate.getUri();
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec redirects(int maxRedirects) {
+    return delegate.redirects(maxRedirects);
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec onRedirect(ratpack.func.Function<? super ratpack.http.client.ReceivedResponse, ratpack.func.Action<? super RequestSpec>> function) {
+    return delegate.onRedirect(function);
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec sslContext(javax.net.ssl.SSLContext sslContext) {
+    return delegate.sslContext(sslContext);
+  }
+  
+  @Override
+  public ratpack.http.Body getBody() {
+    return delegate.getBody();
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec body(ratpack.func.Action<? super ratpack.http.client.RequestSpec.Body> action) throws Exception {
+    // Capture the body
+    RequestSpec result = delegate.body(action);
+    
+    // Try to extract body content
+    try {
+      ratpack.http.Body body = delegate.getBody();
+      if (body != null) {
+        String bodyText = body.getText();
+        String contentType = delegate.getHeaders().get("Content-Type");
+        client.setLastRequestBody(bodyText, contentType);
+      }
+    } catch (Exception e) {
+      // Ignore - body capture is best-effort
+    }
+    
+    return result;
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec basicAuth(String username, String password) {
+    return delegate.basicAuth(username, password);
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec connectTimeout(java.time.Duration duration) {
+    return delegate.connectTimeout(duration);
+  }
+  
+  @Override
+  public ratpack.http.client.RequestSpec readTimeout(java.time.Duration duration) {
+    return delegate.readTimeout(duration);
+  }
+  
+  @Override
+  public java.time.Duration getReadTimeout() {
+    return delegate.getReadTimeout();
+  }
+  
+  @Override
+  public java.time.Duration getConnectTimeout() {
+    return delegate.getConnectTimeout();
   }
 }
