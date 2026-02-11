@@ -36,7 +36,10 @@ public class WriteBatchCurrencyResourceIT extends RatpackServerBaseIT {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
     apiClient.setTestContext("WriteBatchCurrencyResourceIT", "givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults");
     
+    String requestBody = BatchCurrencyRequestUtil.currencyRequest();
+    
     var receivedResponse = apiClient
+      .withBody(requestBody)  // Capture request body for OpenAPI spec
       .requestSpec(BatchCurrencyRequestUtil::constructCurrencyRequest)
       .post("/v1/WriteBatchCurrencyResource");
 

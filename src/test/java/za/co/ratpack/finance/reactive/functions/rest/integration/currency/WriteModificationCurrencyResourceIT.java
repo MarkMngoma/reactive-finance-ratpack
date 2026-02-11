@@ -73,6 +73,7 @@ public class WriteModificationCurrencyResourceIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
+      .withBody(modifyRequest)  // Capture request body for OpenAPI spec
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {

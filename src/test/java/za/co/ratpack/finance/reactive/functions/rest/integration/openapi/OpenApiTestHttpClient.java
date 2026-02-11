@@ -47,26 +47,40 @@ public class OpenApiTestHttpClient {
   
   /**
    * Supports requestSpec() chaining like TestHttpClient.
-   * Wraps the action to capture request body and headers.
+   * Captures request headers. Request body should be set using the helper method.
    */
   public OpenApiTestHttpClient requestSpec(Action<? super RequestSpec> requestSpec) {
-    // Wrap the requestSpec to capture data
+    // Initialize pending request data
+    if (pendingRequestData == null) {
+      pendingRequestData = new RequestCaptureData();
+    }
+    
+    // Pass through to delegate and capture headers after execution
     delegate.requestSpec(spec -> {
       // Execute the original request spec
       requestSpec.execute(spec);
       
-      // Capture request data after configuration
-      pendingRequestData = new RequestCaptureData();
-      
-      // Capture headers
+      // Capture headers after configuration
       spec.getHeaders().getNames().forEach(name -> {
         pendingRequestData.headers.put(name, spec.getHeaders().get(name));
       });
       
-      // Note: Request body capture from RequestSpec is complex due to Ratpack's API
-      // The body might not be accessible as plain text at this point
-      // For now, we capture headers which is the most critical information
+      // Capture content type
+      pendingRequestData.contentType = spec.getHeaders().get("Content-Type");
     });
+    
+    return this;
+  }
+  
+  /**
+   * Helper method to set request body and capture it for OpenAPI spec.
+   * Usage: apiClient.withBody(jsonString).requestSpec(...).post(...)
+   */
+  public OpenApiTestHttpClient withBody(String bodyText) {
+    if (pendingRequestData == null) {
+      pendingRequestData = new RequestCaptureData();
+    }
+    pendingRequestData.body = bodyText;
     return this;
   }
   

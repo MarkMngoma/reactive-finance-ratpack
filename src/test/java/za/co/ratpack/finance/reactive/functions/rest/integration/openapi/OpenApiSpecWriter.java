@@ -185,18 +185,20 @@ public class OpenApiSpecWriter {
     // Extract path parameters
     List<Parameter> parameters = extractPathParameters(sample.getNormalizedPath());
     
-    // Add common request headers as parameters
-    if (sample.getRequestHeaders() != null && !sample.getRequestHeaders().isEmpty()) {
-      parameters.addAll(extractCommonHeaders(sample.getRequestHeaders()));
-    }
+    // Add common request headers as parameters (with multiple examples from all interactions)
+    parameters.addAll(extractCommonHeaders(allInteractions));
     
     if (!parameters.isEmpty()) {
       operation.setParameters(parameters);
     }
     
-    // Add request body if applicable
-    if (sample.getRequestBody() != null && !sample.getRequestBody().isEmpty()) {
-      RequestBody requestBody = createRequestBody(sample);
+    // Add request body if applicable (with multiple examples from all interactions)
+    List<CapturedInteraction> interactionsWithBody = allInteractions.stream()
+      .filter(i -> i.getRequestBody() != null && !i.getRequestBody().isEmpty())
+      .toList();
+    
+    if (!interactionsWithBody.isEmpty()) {
+      RequestBody requestBody = createRequestBody(interactionsWithBody);
       operation.setRequestBody(requestBody);
     }
     
@@ -256,29 +258,60 @@ public class OpenApiSpecWriter {
   }
   
   /**
-   * Extracts common request headers as parameters.
+   * Extracts common request headers as parameters with multiple examples.
    */
-  private List<Parameter> extractCommonHeaders(Map<String, String> headers) {
+  private List<Parameter> extractCommonHeaders(List<CapturedInteraction> allInteractions) {
     List<Parameter> parameters = new ArrayList<>();
     
-    // Only document meaningful headers (Content-Type, Accept, etc.)
-    for (Map.Entry<String, String> entry : headers.entrySet()) {
-      String headerName = entry.getKey();
-      String headerValue = entry.getValue();
-      
-      // Filter out common/standard headers that are usually auto-managed
-      if (headerName.equalsIgnoreCase("host") || 
-          headerName.equalsIgnoreCase("connection") ||
-          headerName.equalsIgnoreCase("content-length")) {
-        continue;
+    // Collect all unique header names across all interactions
+    Map<String, List<String>> headerExamples = new LinkedHashMap<>();
+    
+    for (CapturedInteraction interaction : allInteractions) {
+      if (interaction.getRequestHeaders() != null) {
+        for (Map.Entry<String, String> entry : interaction.getRequestHeaders().entrySet()) {
+          String headerName = entry.getKey();
+          String headerValue = entry.getValue();
+          
+          // Filter out common/standard headers that are usually auto-managed
+          if (headerName.equalsIgnoreCase("host") || 
+              headerName.equalsIgnoreCase("connection") ||
+              headerName.equalsIgnoreCase("content-length")) {
+            continue;
+          }
+          
+          // Collect examples for this header
+          headerExamples.computeIfAbsent(headerName, k -> new ArrayList<>());
+          if (!headerExamples.get(headerName).contains(headerValue)) {
+            headerExamples.get(headerName).add(headerValue);
+          }
+        }
       }
+    }
+    
+    // Create parameters with examples
+    for (Map.Entry<String, List<String>> entry : headerExamples.entrySet()) {
+      String headerName = entry.getKey();
+      List<String> examples = entry.getValue();
       
       io.swagger.v3.oas.models.parameters.HeaderParameter parameter = 
         new io.swagger.v3.oas.models.parameters.HeaderParameter();
       parameter.setName(headerName);
       parameter.setRequired(false);
       parameter.setSchema(new StringSchema());
-      parameter.setExample(headerValue);
+      
+      // Add multiple examples if available
+      if (examples.size() > 1) {
+        Map<String, io.swagger.v3.oas.models.examples.Example> examplesMap = new LinkedHashMap<>();
+        for (int i = 0; i < examples.size(); i++) {
+          io.swagger.v3.oas.models.examples.Example example = new io.swagger.v3.oas.models.examples.Example();
+          example.setValue(examples.get(i));
+          examplesMap.put("example" + (i + 1), example);
+        }
+        parameter.setExamples(examplesMap);
+      } else if (!examples.isEmpty()) {
+        // Single example
+        parameter.setExample(examples.get(0));
+      }
       
       parameters.add(parameter);
     }
@@ -287,22 +320,22 @@ public class OpenApiSpecWriter {
   }
   
   /**
-   * Creates a RequestBody from the interaction.
+   * Creates a RequestBody from multiple interactions with multiple examples.
    */
-  private RequestBody createRequestBody(CapturedInteraction interaction) {
+  private RequestBody createRequestBody(List<CapturedInteraction> interactions) {
     RequestBody requestBody = new RequestBody();
     requestBody.setRequired(true);
     
     Content content = new Content();
     MediaType mediaType = new MediaType();
     
+    CapturedInteraction sample = interactions.get(0);
+    
     // Try to infer schema from JSON body
-    if (interaction.getRequestBody() != null && isJson(interaction.getRequestContentType())) {
+    if (sample.getRequestBody() != null && isJson(sample.getRequestContentType())) {
       try {
-        Schema<?> schema = inferSchemaFromJson(interaction.getRequestBody());
+        Schema<?> schema = inferSchemaFromJson(sample.getRequestBody());
         mediaType.setSchema(schema);
-        // Add example from actual request body
-        mediaType.setExample(parseJsonExample(interaction.getRequestBody()));
       } catch (Exception e) {
         LOG.warn("Could not infer schema from request body", e);
         mediaType.setSchema(new ObjectSchema());
@@ -311,8 +344,31 @@ public class OpenApiSpecWriter {
       mediaType.setSchema(new ObjectSchema());
     }
     
-    String contentType = interaction.getRequestContentType() != null 
-      ? interaction.getRequestContentType() 
+    // Add multiple examples if we have more than one interaction
+    if (interactions.size() > 1) {
+      Map<String, io.swagger.v3.oas.models.examples.Example> examplesMap = new LinkedHashMap<>();
+      
+      for (int i = 0; i < interactions.size(); i++) {
+        CapturedInteraction interaction = interactions.get(i);
+        if (interaction.getRequestBody() != null && !interaction.getRequestBody().isEmpty()) {
+          String exampleName = generateExampleName(interaction, i, 0);
+          io.swagger.v3.oas.models.examples.Example example = new io.swagger.v3.oas.models.examples.Example();
+          example.setValue(parseJsonExample(interaction.getRequestBody()));
+          example.setSummary(generateExampleSummary(interaction));
+          examplesMap.put(exampleName, example);
+        }
+      }
+      
+      if (!examplesMap.isEmpty()) {
+        mediaType.setExamples(examplesMap);
+      }
+    } else {
+      // Single example - use the simple 'example' field
+      mediaType.setExample(parseJsonExample(sample.getRequestBody()));
+    }
+    
+    String contentType = sample.getRequestContentType() != null 
+      ? sample.getRequestContentType() 
       : "application/json";
     
     content.addMediaType(contentType, mediaType);
@@ -335,32 +391,69 @@ public class OpenApiSpecWriter {
     for (Map.Entry<Integer, List<CapturedInteraction>> entry : byStatus.entrySet()) {
       int statusCode = entry.getKey();
       List<CapturedInteraction> statusInteractions = entry.getValue();
-      CapturedInteraction sample = statusInteractions.get(0);
       
       ApiResponse apiResponse = new ApiResponse();
       apiResponse.setDescription(getStatusDescription(statusCode));
       
-      // Add response headers from first sample
-      if (sample.getResponseHeaders() != null && !sample.getResponseHeaders().isEmpty()) {
+      // Collect response headers from all interactions with multiple examples
+      Map<String, List<String>> headerExamples = new LinkedHashMap<>();
+      for (CapturedInteraction interaction : statusInteractions) {
+        if (interaction.getResponseHeaders() != null) {
+          for (Map.Entry<String, String> headerEntry : interaction.getResponseHeaders().entrySet()) {
+            String headerName = headerEntry.getKey();
+            String headerValue = headerEntry.getValue();
+            headerExamples.computeIfAbsent(headerName, k -> new ArrayList<>());
+            if (!headerExamples.get(headerName).contains(headerValue)) {
+              headerExamples.get(headerName).add(headerValue);
+            }
+          }
+        }
+      }
+      
+      // Add response headers with multiple examples
+      if (!headerExamples.isEmpty()) {
         Map<String, io.swagger.v3.oas.models.headers.Header> headerMap = new HashMap<>();
-        sample.getResponseHeaders().forEach((name, value) -> {
+        for (Map.Entry<String, List<String>> headerEntry : headerExamples.entrySet()) {
+          String headerName = headerEntry.getKey();
+          List<String> examples = headerEntry.getValue();
+          
           io.swagger.v3.oas.models.headers.Header header = new io.swagger.v3.oas.models.headers.Header();
           header.setSchema(new StringSchema());
-          header.setExample(value);
-          headerMap.put(name, header);
-        });
+          
+          // Add multiple examples if available
+          if (examples.size() > 1) {
+            Map<String, io.swagger.v3.oas.models.examples.Example> examplesMap = new LinkedHashMap<>();
+            for (int i = 0; i < examples.size(); i++) {
+              io.swagger.v3.oas.models.examples.Example example = new io.swagger.v3.oas.models.examples.Example();
+              example.setValue(examples.get(i));
+              examplesMap.put("example" + (i + 1), example);
+            }
+            header.setExamples(examplesMap);
+          } else if (!examples.isEmpty()) {
+            // Single example
+            header.setExample(examples.get(0));
+          }
+          
+          headerMap.put(headerName, header);
+        }
         apiResponse.setHeaders(headerMap);
       }
       
-      if (sample.getResponseBody() != null && !sample.getResponseBody().isEmpty()) {
+      // Check if any interaction has a response body
+      CapturedInteraction sampleWithBody = statusInteractions.stream()
+        .filter(i -> i.getResponseBody() != null && !i.getResponseBody().isEmpty())
+        .findFirst()
+        .orElse(null);
+      
+      if (sampleWithBody != null) {
         Content content = new Content();
         MediaType mediaType = new MediaType();
         
         // Try to infer schema from JSON body
         Schema<?> schema = null;
-        if (isJson(sample.getResponseContentType())) {
+        if (isJson(sampleWithBody.getResponseContentType())) {
           try {
-            schema = inferSchemaFromJson(sample.getResponseBody());
+            schema = inferSchemaFromJson(sampleWithBody.getResponseBody());
             mediaType.setSchema(schema);
           } catch (Exception e) {
             LOG.warn("Could not infer schema from response body", e);
@@ -390,11 +483,11 @@ public class OpenApiSpecWriter {
           }
         } else {
           // Single example - use the simple 'example' field
-          mediaType.setExample(parseJsonExample(sample.getResponseBody()));
+          mediaType.setExample(parseJsonExample(sampleWithBody.getResponseBody()));
         }
         
-        String contentType = sample.getResponseContentType() != null 
-          ? sample.getResponseContentType() 
+        String contentType = sampleWithBody.getResponseContentType() != null 
+          ? sampleWithBody.getResponseContentType() 
           : "application/json";
         
         content.addMediaType(contentType, mediaType);
