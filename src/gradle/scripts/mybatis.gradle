@@ -1,0 +1,4 @@
+// MyBatis configuration placeholder
+// This file is part of the gradle-plugins submodule
+// Since the submodule cannot be cloned (SSH access required), this is a placeholder
+// Add MyBatis-specific Gradle configurations here if needed

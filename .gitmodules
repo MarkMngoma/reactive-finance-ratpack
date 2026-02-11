@@ -1,3 +1,0 @@
-[submodule "src/gradle/scripts"]
-	path = src/gradle/scripts
-	url = git@github.com:MarkMngoma/gradle-plugins.git
