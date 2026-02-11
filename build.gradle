@@ -82,6 +82,9 @@ dependencies {
   testImplementation "commons-dbutils:commons-dbutils:${dbUtilsVersion}"
   testImplementation "uk.org.webcompere:system-stubs-jupiter:${systemStubsVersion}"
   
+  testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+  testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+  
   // OpenAPI/Swagger Dependencies
   testImplementation "io.swagger.core.v3:swagger-models:${swaggerVersion}"
   testImplementation "io.swagger.core.v3:swagger-core:${swaggerVersion}"

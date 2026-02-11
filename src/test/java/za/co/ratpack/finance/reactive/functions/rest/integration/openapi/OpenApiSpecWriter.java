@@ -25,8 +25,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,7 +98,7 @@ public class OpenApiSpecWriter {
    */
   private OpenAPI loadExistingSpec() {
     try {
-      Path path = Paths.get(specPath);
+      java.nio.file.Path path = java.nio.file.Paths.get(specPath);
       if (Files.exists(path)) {
         String content = Files.readString(path);
         return Yaml.mapper().readValue(content, OpenAPI.class);
@@ -399,7 +397,7 @@ public class OpenApiSpecWriter {
    * Writes the OpenAPI spec to file.
    */
   private void writeSpecToFile(OpenAPI openAPI) throws IOException {
-    Path path = Paths.get(specPath);
+    java.nio.file.Path path = java.nio.file.Paths.get(specPath);
     
     // Ensure parent directory exists
     Files.createDirectories(path.getParent());
