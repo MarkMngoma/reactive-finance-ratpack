@@ -89,6 +89,12 @@ dependencies {
   testImplementation "io.swagger.core.v3:swagger-models:${swaggerVersion}"
   testImplementation "io.swagger.core.v3:swagger-core:${swaggerVersion}"
   testImplementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonYamlVersion}"
+  testImplementation platform("org.junit:junit-bom:${junitJupiterVersion}")
+  testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
+  testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+  testImplementation "io.ratpack:ratpack-test:${ratpackVersion}"
+  testImplementation "commons-dbutils:commons-dbutils:${dbUtilsVersion}"
+  testImplementation "uk.org.webcompere:system-stubs-jupiter:${systemStubsVersion}"
 }
 
 ext {
