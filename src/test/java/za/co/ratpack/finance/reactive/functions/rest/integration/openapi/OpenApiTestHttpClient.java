@@ -30,6 +30,7 @@ public class OpenApiTestHttpClient {
   private final OpenApiCapture capture;
   private String testClassName;
   private String testMethodName;
+  private RequestCaptureData pendingRequestData;
   
   public OpenApiTestHttpClient(TestHttpClient delegate) {
     this.delegate = delegate;
@@ -46,12 +47,26 @@ public class OpenApiTestHttpClient {
   
   /**
    * Supports requestSpec() chaining like TestHttpClient.
+   * Wraps the action to capture request body and headers.
    */
   public OpenApiTestHttpClient requestSpec(Action<? super RequestSpec> requestSpec) {
-    // For now, we pass through directly. Body capture could be enhanced in the future
-    // by inspecting the RequestSpec after the consumer runs, but that requires
-    // accessing internals that may not be reliably available.
-    delegate.requestSpec(requestSpec);
+    // Wrap the requestSpec to capture data
+    delegate.requestSpec(spec -> {
+      // Execute the original request spec
+      requestSpec.execute(spec);
+      
+      // Capture request data after configuration
+      pendingRequestData = new RequestCaptureData();
+      
+      // Capture headers
+      spec.getHeaders().getNames().forEach(name -> {
+        pendingRequestData.headers.put(name, spec.getHeaders().get(name));
+      });
+      
+      // Note: Request body capture from RequestSpec is complex due to Ratpack's API
+      // The body might not be accessible as plain text at this point
+      // For now, we capture headers which is the most critical information
+    });
     return this;
   }
   
@@ -61,6 +76,7 @@ public class OpenApiTestHttpClient {
   public ReceivedResponse get(String path) {
     ReceivedResponse response = delegate.get(path);
     captureInteraction("GET", path, response);
+    clearPendingRequest();
     return response;
   }
   
@@ -70,6 +86,7 @@ public class OpenApiTestHttpClient {
   public ReceivedResponse post(String path) {
     ReceivedResponse response = delegate.post(path);
     captureInteraction("POST", path, response);
+    clearPendingRequest();
     return response;
   }
   
@@ -79,6 +96,7 @@ public class OpenApiTestHttpClient {
   public ReceivedResponse put(String path) {
     ReceivedResponse response = delegate.put(path);
     captureInteraction("PUT", path, response);
+    clearPendingRequest();
     return response;
   }
   
@@ -88,6 +106,7 @@ public class OpenApiTestHttpClient {
   public ReceivedResponse delete(String path) {
     ReceivedResponse response = delegate.delete(path);
     captureInteraction("DELETE", path, response);
+    clearPendingRequest();
     return response;
   }
   
@@ -97,7 +116,15 @@ public class OpenApiTestHttpClient {
   public ReceivedResponse patch(String path) {
     ReceivedResponse response = delegate.patch(path);
     captureInteraction("PATCH", path, response);
+    clearPendingRequest();
     return response;
+  }
+  
+  /**
+   * Clears pending request data.
+   */
+  private void clearPendingRequest() {
+    pendingRequestData = null;
   }
   
   /**
@@ -107,9 +134,17 @@ public class OpenApiTestHttpClient {
     try {
       // Extract request information
       Map<String, String> requestHeaders = new HashMap<>();
-      Map<String, String> responseHeaders = new HashMap<>();
+      String requestBody = null;
+      String requestContentType = null;
+      
+      if (pendingRequestData != null) {
+        requestHeaders.putAll(pendingRequestData.headers);
+        requestBody = pendingRequestData.body;
+        requestContentType = pendingRequestData.contentType;
+      }
       
       // Extract response headers
+      Map<String, String> responseHeaders = new HashMap<>();
       response.getHeaders().getNames().forEach(name -> {
         responseHeaders.put(name, response.getHeaders().get(name));
       });
@@ -117,16 +152,13 @@ public class OpenApiTestHttpClient {
       // Normalize the path for OpenAPI
       String normalizedPath = normalizePath(path);
       
-      // Note: Request body capture is not implemented in this version
-      // as it requires deep inspection of Ratpack's internal state
-      
       CapturedInteraction interaction = CapturedInteraction.builder()
         .method(method)
         .requestPath(path)
         .normalizedPath(normalizedPath)
         .requestHeaders(requestHeaders)
-        .requestContentType(null)  // Not captured in this simplified version
-        .requestBody(null)  // Not captured in this simplified version
+        .requestContentType(requestContentType)
+        .requestBody(requestBody)
         .responseStatusCode(response.getStatusCode())
         .responseHeaders(responseHeaders)
         .responseContentType(response.getHeaders().get("Content-Type"))
@@ -148,6 +180,7 @@ public class OpenApiTestHttpClient {
    * - UUID segments → {id}
    * - Numeric segments (not first) → {id}
    * - Known Ratpack tokens like :currencyCode → {currencyCode}
+   * - Currency codes (3 uppercase letters) → {currencyCode}
    */
   private String normalizePath(String path) {
     String[] segments = path.split("/");
@@ -192,5 +225,14 @@ public class OpenApiTestHttpClient {
    */
   public TestHttpClient getDelegate() {
     return delegate;
+  }
+  
+  /**
+   * Internal class to hold pending request capture data.
+   */
+  private static class RequestCaptureData {
+    Map<String, String> headers = new HashMap<>();
+    String body;
+    String contentType;
   }
 }

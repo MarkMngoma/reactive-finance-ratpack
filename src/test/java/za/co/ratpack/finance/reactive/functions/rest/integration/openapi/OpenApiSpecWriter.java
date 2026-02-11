@@ -178,6 +178,12 @@ public class OpenApiSpecWriter {
     
     // Extract path parameters
     List<Parameter> parameters = extractPathParameters(sample.getNormalizedPath());
+    
+    // Add common request headers as parameters
+    if (sample.getRequestHeaders() != null && !sample.getRequestHeaders().isEmpty()) {
+      parameters.addAll(extractCommonHeaders(sample.getRequestHeaders()));
+    }
+    
     if (!parameters.isEmpty()) {
       operation.setParameters(parameters);
     }
@@ -244,6 +250,37 @@ public class OpenApiSpecWriter {
   }
   
   /**
+   * Extracts common request headers as parameters.
+   */
+  private List<Parameter> extractCommonHeaders(Map<String, String> headers) {
+    List<Parameter> parameters = new ArrayList<>();
+    
+    // Only document meaningful headers (Content-Type, Accept, etc.)
+    for (Map.Entry<String, String> entry : headers.entrySet()) {
+      String headerName = entry.getKey();
+      String headerValue = entry.getValue();
+      
+      // Filter out common/standard headers that are usually auto-managed
+      if (headerName.equalsIgnoreCase("host") || 
+          headerName.equalsIgnoreCase("connection") ||
+          headerName.equalsIgnoreCase("content-length")) {
+        continue;
+      }
+      
+      io.swagger.v3.oas.models.parameters.HeaderParameter parameter = 
+        new io.swagger.v3.oas.models.parameters.HeaderParameter();
+      parameter.setName(headerName);
+      parameter.setRequired(false);
+      parameter.setSchema(new StringSchema());
+      parameter.setExample(headerValue);
+      
+      parameters.add(parameter);
+    }
+    
+    return parameters;
+  }
+  
+  /**
    * Creates a RequestBody from the interaction.
    */
   private RequestBody createRequestBody(CapturedInteraction interaction) {
@@ -258,6 +295,8 @@ public class OpenApiSpecWriter {
       try {
         Schema<?> schema = inferSchemaFromJson(interaction.getRequestBody());
         mediaType.setSchema(schema);
+        // Add example from actual request body
+        mediaType.setExample(parseJsonExample(interaction.getRequestBody()));
       } catch (Exception e) {
         LOG.warn("Could not infer schema from request body", e);
         mediaType.setSchema(new ObjectSchema());
@@ -293,6 +332,18 @@ public class OpenApiSpecWriter {
       ApiResponse apiResponse = new ApiResponse();
       apiResponse.setDescription(getStatusDescription(statusCode));
       
+      // Add response headers
+      if (sample.getResponseHeaders() != null && !sample.getResponseHeaders().isEmpty()) {
+        Map<String, io.swagger.v3.oas.models.headers.Header> headerMap = new HashMap<>();
+        sample.getResponseHeaders().forEach((name, value) -> {
+          io.swagger.v3.oas.models.headers.Header header = new io.swagger.v3.oas.models.headers.Header();
+          header.setSchema(new StringSchema());
+          header.setExample(value);
+          headerMap.put(name, header);
+        });
+        apiResponse.setHeaders(headerMap);
+      }
+      
       if (sample.getResponseBody() != null && !sample.getResponseBody().isEmpty()) {
         Content content = new Content();
         MediaType mediaType = new MediaType();
@@ -302,6 +353,8 @@ public class OpenApiSpecWriter {
           try {
             Schema<?> schema = inferSchemaFromJson(sample.getResponseBody());
             mediaType.setSchema(schema);
+            // Add example from actual response body
+            mediaType.setExample(parseJsonExample(sample.getResponseBody()));
           } catch (Exception e) {
             LOG.warn("Could not infer schema from response body", e);
             mediaType.setSchema(new ObjectSchema());
@@ -391,6 +444,19 @@ public class OpenApiSpecWriter {
       case 500 -> "Internal Server Error";
       default -> "Response";
     };
+  }
+  
+  /**
+   * Parses JSON string into an example object for OpenAPI.
+   */
+  private Object parseJsonExample(String jsonContent) {
+    try {
+      JsonNode node = jsonMapper.readTree(jsonContent);
+      return jsonMapper.convertValue(node, Object.class);
+    } catch (Exception e) {
+      LOG.warn("Could not parse JSON example", e);
+      return jsonContent;
+    }
   }
   
   /**
