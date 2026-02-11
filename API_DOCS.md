@@ -1,70 +1,54 @@
-# API Documentation with Scalar UI
+# API Documentation
 
-This project includes Docker Compose setup to serve the auto-generated OpenAPI specification through a beautiful Scalar UI interface with a **classic theme** and **dark mode toggle**.
-
-## Prerequisites
-
-- Docker and Docker Compose installed
-- OpenAPI spec generated (run tests to generate it)
+This project includes **integrated API documentation** served directly by the Ratpack application on port 5051. The documentation features a beautiful Scalar UI interface with **classic theme** and **dark mode toggle**.
 
 ## Quick Start
 
-### Option 1: Using the convenience script
+### Running the Application
+
+Start the Ratpack application:
 
 ```bash
-./start-api-docs.sh
+./gradlew run
 ```
 
-This will:
-1. Check if Docker is running
-2. Verify the OpenAPI spec exists
-3. Start the documentation server
-4. Display the URL to access the docs
+### Accessing the Documentation
 
-### Option 2: Using Docker Compose directly
+Once the application is running, the API documentation is available at:
 
-```bash
-docker compose -f docker-compose-docs.yml up -d
+**👉 http://localhost:5051/api-docs**
+
+The OpenAPI specification is also available at:
+
+**👉 http://localhost:5051/api-docs/openapi.yaml**
+
+## Features
+
+The Scalar UI provides:
+
+- ✅ **Integrated with Application** - Runs on same port as API (5051)
+- ✅ **Classic theme as default** - Clean, professional appearance
+- ✅ **Dark mode toggle** - Switch between light and dark themes
+- ✅ **Interactive API explorer** - Test endpoints directly from the UI
+- ✅ **Multiple response examples** - See all possible response scenarios
+- ✅ **Complete documentation** - Headers, parameters, schemas
+- ✅ **Auto-synced** - Updates when OpenAPI spec regenerates
+
+## Architecture
+
+The documentation is served by the Ratpack application:
+
+```
+Ratpack Application (Port 5051)
+├── /v1/* → API Endpoints
+└── /api-docs/* → API Documentation
+    ├── /api-docs → Scalar UI (index.html)
+    └── /api-docs/openapi.yaml → OpenAPI 3.0.3 Specification
 ```
 
-## Accessing the Documentation
-
-Once started, open your browser and navigate to:
-
-**👉 http://localhost:8080**
-
-You'll see a beautiful Scalar UI interface displaying your API documentation with:
-- **Classic theme by default** - Clean, professional appearance
-- **Dark mode toggle** - Switch between light and dark themes
-- Interactive API explorer
-- Request/response examples
-- Multiple response scenarios
-- Complete header documentation
-- Path parameters
-- Schema definitions
-
-## UI Theme Configuration
-
-The Scalar UI is configured with:
-- ✅ **Classic theme** as the default (professional, clean look)
-- ✅ **Dark mode toggle** available in the top-right corner
-- ✅ **Classic layout** for optimal readability
-
-Users can switch between light and dark modes using the theme toggle button in the UI.
-
-## Stopping the Documentation Server
-
-### Using the convenience script:
-
-```bash
-./stop-api-docs.sh
-```
-
-### Using Docker Compose:
-
-```bash
-docker compose -f docker-compose-docs.yml down
-```
+Files are served from `src/main/resources/api-docs/`:
+- `index.html` - Scalar UI loader with theme configuration
+- `openapi.yaml` - Auto-generated OpenAPI specification
 
 ## Generating/Updating the OpenAPI Spec
 
@@ -79,85 +63,112 @@ The API documentation is auto-generated from integration tests. To regenerate th
 ./gradlew test --tests "WriteCurrencyMultipleStatusCodesIT"
 ```
 
-The OpenAPI spec will be updated at: `src/test/resources/spec/openapi.yaml`
+After running tests:
+1. The OpenAPI spec is generated at `src/test/resources/spec/openapi.yaml`
+2. Copy it to `src/main/resources/api-docs/openapi.yaml`
+3. Restart the application to see updates
 
-After updating the spec, simply refresh your browser - no need to restart the Docker container!
+## UI Theme Configuration
 
-## Architecture
+The Scalar UI is configured with:
+- ✅ **Classic theme** as the default (professional, clean look)
+- ✅ **Dark mode toggle** available in the top-right corner
+- ✅ **Classic layout** for optimal readability
 
-The documentation setup consists of:
-
-- **docker-compose-docs.yml**: Defines the nginx service to serve static files
-- **src/test/resources/spec/index.html**: HTML page that loads Scalar UI from CDN with theme configuration
-- **src/test/resources/spec/openapi.yaml**: Auto-generated OpenAPI 3.0.3 specification
-- **start-api-docs.sh**: Convenience script to start the documentation server
-- **stop-api-docs.sh**: Convenience script to stop the documentation server
-
-## Features
-
-The Scalar UI provides:
-
-- ✅ Beautiful, modern interface with **classic theme**
-- ✅ **Dark mode toggle** for user preference
-- ✅ Dark/light mode support
-- ✅ Interactive API testing
-- ✅ Multiple example responses per endpoint
-- ✅ Complete request/response documentation
-- ✅ Header examples
-- ✅ Path parameter documentation
-- ✅ Schema inference and visualization
-
-## Customizing the Theme
-
-To customize the theme settings, edit `src/test/resources/spec/index.html`:
+To customize the theme, edit `src/main/resources/api-docs/index.html`:
 
 ```javascript
 var configuration = {
-  spec: {
-    url: '/openapi.yaml',
-  },
+  spec: { url: '/openapi.yaml' },
   theme: 'default',  // Classic theme (options: 'default', 'alternate', 'moon', 'purple', 'solarized')
   darkMode: true,    // Enable dark mode toggle (true/false)
-  layout: 'classic', // Use classic layout (options: 'classic', 'modern')
+  layout: 'classic'  // Use classic layout (options: 'classic', 'modern')
 }
 ```
 
-After making changes, restart the container:
+## Alternative: Docker Compose (Standalone)
+
+If you prefer to run the documentation independently on port 8080:
+
 ```bash
-docker compose -f docker-compose-docs.yml restart
+./start-api-docs.sh
+# or
+docker compose -f docker-compose-docs.yml up -d
 ```
+
+Access at: http://localhost:8080
+
+Stop with:
+```bash
+./stop-api-docs.sh
+# or
+docker compose -f docker-compose-docs.yml down
+```
+
+## Benefits of Integrated Approach
+
+✅ **Same Port**: Documentation and API on one port (5051)  
+✅ **No Separate Container**: Simpler deployment  
+✅ **Easy Testing**: Test API and view docs simultaneously  
+✅ **Integrated**: Bundled in application JAR  
+✅ **Production Ready**: Deploy documentation with your application
 
 ## Troubleshooting
 
-### Port Already in Use
+### Documentation Not Loading
 
-If port 8080 is already in use, you can modify the port mapping in `docker-compose-docs.yml`:
+If the documentation doesn't load:
 
-```yaml
-ports:
-  - "8081:80"  # Change 8080 to another port
-```
+1. **Check application is running**:
+   ```bash
+   curl http://localhost:5051/api-docs
+   ```
+
+2. **Verify OpenAPI spec exists**:
+   ```bash
+   ls -la src/main/resources/api-docs/openapi.yaml
+   ```
+
+3. **Check application logs** for any errors
 
 ### OpenAPI Spec Not Found
 
-If you see a warning about the missing OpenAPI spec, run the tests first:
+If you see a 404 for the OpenAPI spec:
 
-```bash
-./gradlew test --tests "*CurrencyResourceIT"
+1. Run tests to generate it:
+   ```bash
+   ./gradlew test --tests "*CurrencyResourceIT"
+   ```
+
+2. Copy to main resources:
+   ```bash
+   cp src/test/resources/spec/openapi.yaml src/main/resources/api-docs/
+   ```
+
+3. Restart the application
+
+### Port Already in Use
+
+If port 5051 is already in use, update `src/main/resources/application-localhost.yml`:
+
+```yaml
+server:
+  defaultPort: 8080  # Change to another port
 ```
 
-### Container Won't Start
+## Implementation Details
 
-Check Docker logs:
+The API documentation is served by:
 
-```bash
-docker compose -f docker-compose-docs.yml logs
-```
+- **ApiDocsHandler** (`src/main/java/.../handlers/ApiDocsHandler.java`)
+  - Serves static files from classpath resources
+  - Handles content type detection (HTML, YAML, JSON)
+  - Returns 404 for missing resources
 
-### Theme Not Updating
+- **ServerCommand** (`src/main/java/.../ServerCommand.java`)
+  - Routes `/api-docs` prefix to ApiDocsHandler
+  - Integrated into main application routing chain
 
-After changing theme configuration in `index.html`, restart the container:
+- **FunctionHandlerModule** (`src/main/java/.../guice/modules/FunctionHandlerModule.java`)
+  - Registers ApiDocsHandler with Guice for dependency injection
 
-```bash
-docker compose -f docker-compose-docs.yml restart
-```
