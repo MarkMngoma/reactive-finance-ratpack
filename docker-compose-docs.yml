@@ -1,0 +1,15 @@
+services:
+  api-docs:
+    image: nginx:alpine
+    container_name: reactive-finance-api-docs
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src/test/resources/spec:/usr/share/nginx/html:ro
+    restart: unless-stopped
+    networks:
+      - docs-network
+
+networks:
+  docs-network:
+    driver: bridge
