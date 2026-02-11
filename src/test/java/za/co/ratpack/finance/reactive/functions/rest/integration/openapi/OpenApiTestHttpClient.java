@@ -1,16 +1,16 @@
 package za.co.ratpack.finance.reactive.functions.rest.integration.openapi;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import ratpack.func.Action;
 import ratpack.http.client.ReceivedResponse;
 import ratpack.http.client.RequestSpec;
 import ratpack.test.http.TestHttpClient;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.regex.Pattern;
 
 /**
  * Decorator/wrapper around Ratpack's TestHttpClient that intercepts HTTP calls

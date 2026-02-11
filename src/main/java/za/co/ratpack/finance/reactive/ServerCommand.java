@@ -69,6 +69,7 @@ public class ServerCommand {
       .all(RequestLogger.ncsa())
       .all(LoggingMDCHandler.class)
       .all(ServerResponseHandler.class)
+      .files(fileHandlerSpec -> fileHandlerSpec.dir("api-docs").indexFiles("openapi.yaml"))
       .prefix("api-docs", apiDocsChain -> apiDocsChain.all(ApiDocsHandler.class))
       .prefix("v1", FinanceActionChain.class);
   }

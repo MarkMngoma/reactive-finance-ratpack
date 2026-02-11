@@ -1,8 +1,9 @@
 package za.co.ratpack.finance.reactive.functions.handlers.currency;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.neovisionaries.i18n.CountryCode;
-import jakarta.validation.Validation;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Map;
+
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neovisionaries.i18n.CountryCode;
+
+import jakarta.validation.Validation;
 import ratpack.func.Action;
 import ratpack.http.MediaType;
 import ratpack.http.Status;
@@ -24,11 +30,6 @@ import za.co.ratpack.finance.reactive.domain.mybatis.model.mapper.BatchObjectMap
 import za.co.ratpack.finance.reactive.functions.handlers.ThrowableHandler;
 import za.co.ratpack.finance.reactive.functions.helpers.HttpContentHelper;
 import za.co.ratpack.finance.reactive.rest.v1.dto.CurrencyRequest;
-
-import java.net.URI;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class WriteCurrencyResourceHandlerTest {
