@@ -15,14 +15,16 @@
     <!-- Scalar API Reference -->
     <script
         id="api-reference"
-        type="application/json"
-        data-configuration='{"spec":{"url":"/openapi.yaml"}}'>
+        type="application/json">
     </script>
     <script>
       var configuration = {
         spec: {
           url: '/openapi.yaml',
         },
+        theme: 'default',  // Classic theme as default
+        darkMode: true,    // Enable dark mode toggle
+        layout: 'classic', // Use classic layout
       }
 
       document.getElementById('api-reference').dataset.configuration = JSON.stringify(configuration)
