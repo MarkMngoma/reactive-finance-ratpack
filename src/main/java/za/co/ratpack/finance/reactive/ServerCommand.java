@@ -69,8 +69,7 @@ public class ServerCommand {
       .all(RequestLogger.ncsa())
       .all(LoggingMDCHandler.class)
       .all(ServerResponseHandler.class)
-      .path("api-docs", ApiDocsHandler.class)
-      .path("api-docs/:filename", ApiDocsHandler.class)
+      .prefix("api-docs", apiDocsChain -> apiDocsChain.all(ApiDocsHandler.class))
       .prefix("v1", FinanceActionChain.class);
   }
 

@@ -24,11 +24,14 @@ public class ApiDocsHandler implements Handler {
   public void handle(Context ctx) {
     String path = ctx.getRequest().getPath();
     
-    // Remove leading slash and "api-docs" prefix if present
-    String resourcePath = path.replaceFirst("^/+api-docs/?", "");
-    
-    // Default to index.html if no specific file requested
-    if (resourcePath.isEmpty() || resourcePath.equals("/")) {
+    // Extract the resource path after /api-docs
+    String resourcePath;
+    if (path.equals("/api-docs") || path.equals("/api-docs/")) {
+      resourcePath = "index.html";
+    } else if (path.startsWith("/api-docs/")) {
+      resourcePath = path.substring("/api-docs/".length());
+    } else {
+      // Should not happen given routing, but handle gracefully
       resourcePath = "index.html";
     }
     
@@ -36,7 +39,7 @@ public class ApiDocsHandler implements Handler {
     String fullPath = "api-docs/" + resourcePath;
     
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Serving API docs resource: {}", fullPath);
+      LOG.debug("Serving API docs resource: {} (from path: {})", fullPath, path);
     }
     
     try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fullPath)) {

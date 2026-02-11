@@ -1,6 +1,7 @@
 package za.co.ratpack.finance.reactive.guice.modules;
 
 import com.google.inject.AbstractModule;
+import za.co.ratpack.finance.reactive.functions.handlers.ApiDocsHandler;
 import za.co.ratpack.finance.reactive.functions.handlers.LoggingMDCHandler;
 import za.co.ratpack.finance.reactive.functions.handlers.ServerResponseHandler;
 import za.co.ratpack.finance.reactive.functions.handlers.ThrowableHandler;
@@ -23,6 +24,7 @@ public class FunctionHandlerModule extends AbstractModule {
     bind(ServerResponseHandler.class);
     bind(LoggingMDCHandler.class);
     bind(ThrowableHandler.class);
+    bind(ApiDocsHandler.class);
 
     bind(QueryBatchCurrencyResourceHandler.class);
     bind(QueryCurrencyResourceHandler.class);
