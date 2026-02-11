@@ -7,7 +7,7 @@ paths:
   /v1/QueryCurrencyResource/{currencyCode}:
     get:
       summary: "GET /v1/QueryCurrencyResource/{currencyCode}"
-      operationId: givenCurrencyExistsWhenQueryingByCodeThenVerifyResult
+      operationId: scenarioNotFoundAnotherCurrency
       parameters:
       - name: currencyCode
         in: path
@@ -53,214 +53,21 @@ paths:
                     format: int32
                   message:
                     type: string
-              example:
-                error: 404
-                message: No record found for currency
-  /v1/QueryCurrencyResource:
-    get:
-      summary: GET /v1/QueryCurrencyResource
-      operationId: givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults
-      parameters:
-      - name: cookie
-        in: header
-        required: false
-        schema:
-          type: string
-        example: ""
-      - name: Accept
-        in: header
-        required: false
-        schema:
-          type: string
-        example: application/json
-      - name: Content-Type
-        in: header
-        required: false
-        schema:
-          type: string
-        example: application/json
-      responses:
-        "200":
-          description: OK
-          headers:
-            Accept-Charset:
-              schema:
-                type: string
-              example: UTF-8
-            content-length:
-              schema:
-                type: string
-              example: "2"
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              example: '*'
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              example: "GET, POST, DELETE, PUT, PATCH, TRACE"
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              example: "Origin, Content-Type, Accept, Authorization, X-localization,\
-                \ Proxy-Authorization"
-            Content-Type:
-              schema:
-                type: string
-              example: application/json
-          content:
-            application/json:
-              schema:
-                type: array
-              example: []
-  /v1/WriteBatchCurrencyResource:
-    post:
-      summary: POST /v1/WriteBatchCurrencyResource
-      operationId: givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults
-      parameters:
-      - name: cookie
-        in: header
-        required: false
-        schema:
-          type: string
-        example: ""
-      - name: Accept
-        in: header
-        required: false
-        schema:
-          type: string
-        example: application/json
-      - name: Content-Type
-        in: header
-        required: false
-        schema:
-          type: string
-        example: application/json
-      responses:
-        "200":
-          description: OK
-          headers:
-            Accept-Charset:
-              schema:
-                type: string
-              example: UTF-8
-            content-length:
-              schema:
-                type: string
-              example: "2"
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              example: '*'
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              example: "GET, POST, DELETE, PUT, PATCH, TRACE"
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              example: "Origin, Content-Type, Accept, Authorization, X-localization,\
-                \ Proxy-Authorization"
-            Content-Type:
-              schema:
-                type: string
-              example: application/json
-          content:
-            application/json:
-              schema:
-                type: array
-              example: []
-  /v1/WriteCurrencyResource:
-    post:
-      summary: POST /v1/WriteCurrencyResource
-      operationId: givenValidCurrencyWhenCreatingThenVerifyCreatedResponse
-      parameters:
-      - name: cookie
-        in: header
-        required: false
-        schema:
-          type: string
-        example: ""
-      - name: Accept
-        in: header
-        required: false
-        schema:
-          type: string
-        example: application/json
-      - name: Content-Type
-        in: header
-        required: false
-        schema:
-          type: string
-        example: application/json
-      responses:
-        "201":
-          description: Created
-          headers:
-            Accept-Charset:
-              schema:
-                type: string
-              example: UTF-8
-            content-length:
-              schema:
-                type: string
-              example: "17"
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              example: '*'
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              example: "GET, POST, DELETE, PUT, PATCH, TRACE"
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              example: "Origin, Content-Type, Accept, Authorization, X-localization,\
-                \ Proxy-Authorization"
-            Content-Type:
-              schema:
-                type: string
-              example: application/json
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-              example:
-                success: true
-  /v1/WriteModificationCurrencyResource:
-    put:
-      summary: PUT /v1/WriteModificationCurrencyResource
-      operationId: givenExistingCurrencyWhenModifyingThenVerifyNoContentResponse
-      parameters:
-      - name: cookie
-        in: header
-        required: false
-        schema:
-          type: string
-        example: ""
-      - name: Accept
-        in: header
-        required: false
-        schema:
-          type: string
-        example: application/json
-      - name: Content-Type
-        in: header
-        required: false
-        schema:
-          type: string
-        example: application/json
-      responses:
-        "500":
-          description: Internal Server Error
-          headers:
-            content-length:
-              schema:
-                type: string
-              example: "0"
+              examples:
+                scenarioNotFoundAnotherCurrency:
+                  summary: Scenario Not Found Another Currency
+                  value:
+                    error: 404
+                    message: No record found for currency
+                scenarioNotFoundQuery_1:
+                  summary: Scenario Not Found Query
+                  value:
+                    error: 404
+                    message: No record found for currency
+                scenarioSuccessfulQuery_2:
+                  summary: Scenario Successful Query
+                  value:
+                    error: 404
+                    message: No record found for currency
 components:
   schemas: {}

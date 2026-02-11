@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Collectors;
 
 /**
  * Reads an existing OpenAPI YAML spec or creates a new one, then merges
@@ -317,6 +318,7 @@ public class OpenApiSpecWriter {
   
   /**
    * Creates ApiResponses from all interactions in the group.
+   * Supports multiple examples per status code from different test scenarios.
    */
   private ApiResponses createResponses(List<CapturedInteraction> interactions) {
     ApiResponses responses = new ApiResponses();
@@ -327,12 +329,13 @@ public class OpenApiSpecWriter {
     
     for (Map.Entry<Integer, List<CapturedInteraction>> entry : byStatus.entrySet()) {
       int statusCode = entry.getKey();
-      CapturedInteraction sample = entry.getValue().get(0);
+      List<CapturedInteraction> statusInteractions = entry.getValue();
+      CapturedInteraction sample = statusInteractions.get(0);
       
       ApiResponse apiResponse = new ApiResponse();
       apiResponse.setDescription(getStatusDescription(statusCode));
       
-      // Add response headers
+      // Add response headers from first sample
       if (sample.getResponseHeaders() != null && !sample.getResponseHeaders().isEmpty()) {
         Map<String, io.swagger.v3.oas.models.headers.Header> headerMap = new HashMap<>();
         sample.getResponseHeaders().forEach((name, value) -> {
@@ -349,18 +352,40 @@ public class OpenApiSpecWriter {
         MediaType mediaType = new MediaType();
         
         // Try to infer schema from JSON body
+        Schema<?> schema = null;
         if (isJson(sample.getResponseContentType())) {
           try {
-            Schema<?> schema = inferSchemaFromJson(sample.getResponseBody());
+            schema = inferSchemaFromJson(sample.getResponseBody());
             mediaType.setSchema(schema);
-            // Add example from actual response body
-            mediaType.setExample(parseJsonExample(sample.getResponseBody()));
           } catch (Exception e) {
             LOG.warn("Could not infer schema from response body", e);
             mediaType.setSchema(new ObjectSchema());
           }
         } else {
           mediaType.setSchema(new StringSchema());
+        }
+        
+        // Add multiple examples if we have more than one interaction
+        if (statusInteractions.size() > 1) {
+          Map<String, io.swagger.v3.oas.models.examples.Example> examplesMap = new LinkedHashMap<>();
+          
+          for (int i = 0; i < statusInteractions.size(); i++) {
+            CapturedInteraction interaction = statusInteractions.get(i);
+            if (interaction.getResponseBody() != null && !interaction.getResponseBody().isEmpty()) {
+              String exampleName = generateExampleName(interaction, i, statusCode);
+              io.swagger.v3.oas.models.examples.Example example = new io.swagger.v3.oas.models.examples.Example();
+              example.setValue(parseJsonExample(interaction.getResponseBody()));
+              example.setSummary(generateExampleSummary(interaction));
+              examplesMap.put(exampleName, example);
+            }
+          }
+          
+          if (!examplesMap.isEmpty()) {
+            mediaType.setExamples(examplesMap);
+          }
+        } else {
+          // Single example - use the simple 'example' field
+          mediaType.setExample(parseJsonExample(sample.getResponseBody()));
         }
         
         String contentType = sample.getResponseContentType() != null 
@@ -441,9 +466,47 @@ public class OpenApiSpecWriter {
       case 401 -> "Unauthorized";
       case 403 -> "Forbidden";
       case 404 -> "Not Found";
+      case 409 -> "Conflict";
+      case 422 -> "Unprocessable Entity";
       case 500 -> "Internal Server Error";
       default -> "Response";
     };
+  }
+  
+  /**
+   * Generates a unique example name from the interaction context.
+   */
+  private String generateExampleName(CapturedInteraction interaction, int index, int statusCode) {
+    StringBuilder name = new StringBuilder();
+    
+    if (interaction.getTestMethodName() != null) {
+      // Use test method name as base
+      name.append(interaction.getTestMethodName());
+    } else {
+      name.append("example");
+    }
+    
+    // Add index if there are multiple examples from same test
+    if (index > 0) {
+      name.append("_").append(index);
+    }
+    
+    return name.toString();
+  }
+  
+  /**
+   * Generates a summary for an example based on the interaction context.
+   */
+  private String generateExampleSummary(CapturedInteraction interaction) {
+    if (interaction.getTestMethodName() != null) {
+      // Convert camelCase to readable text
+      String methodName = interaction.getTestMethodName();
+      // Add spaces before capital letters
+      String readable = methodName.replaceAll("([A-Z])", " $1").trim();
+      // Capitalize first letter
+      return readable.substring(0, 1).toUpperCase() + readable.substring(1);
+    }
+    return "Example response";
   }
   
   /**
