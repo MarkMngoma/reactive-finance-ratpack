@@ -69,5 +69,77 @@ paths:
                   value:
                     error: 404
                     message: No record found for currency
+  /v1/WriteCurrencyResource:
+    post:
+      summary: POST /v1/WriteCurrencyResource
+      operationId: scenarioSuccessfulCreationAnotherCurrency
+      parameters:
+      - name: cookie
+        in: header
+        required: false
+        schema:
+          type: string
+        example: ""
+      - name: Accept
+        in: header
+        required: false
+        schema:
+          type: string
+        example: application/json
+      - name: Content-Type
+        in: header
+        required: false
+        schema:
+          type: string
+        example: application/json
+      responses:
+        "201":
+          description: Created
+          headers:
+            Accept-Charset:
+              schema:
+                type: string
+              example: UTF-8
+            content-length:
+              schema:
+                type: string
+              example: "17"
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              example: "GET, POST, DELETE, PUT, PATCH, TRACE"
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              example: "Origin, Content-Type, Accept, Authorization, X-localization,\
+                \ Proxy-Authorization"
+            Content-Type:
+              schema:
+                type: string
+              example: application/json
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+              examples:
+                scenarioSuccessfulCreationAnotherCurrency:
+                  summary: Scenario Successful Creation Another Currency
+                  value:
+                    success: true
+                scenarioSuccessfulCreation_1:
+                  summary: Scenario Successful Creation
+                  value:
+                    success: true
+                scenarioSuccessfulCreationThirdExample_2:
+                  summary: Scenario Successful Creation Third Example
+                  value:
+                    success: true
 components:
   schemas: {}
