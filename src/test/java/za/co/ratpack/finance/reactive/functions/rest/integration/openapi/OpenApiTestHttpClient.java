@@ -55,6 +55,9 @@ public class OpenApiTestHttpClient {
       pendingRequestData = new RequestCaptureData();
     }
     
+    // Capture the reference for use in the lambda
+    final RequestCaptureData captureData = pendingRequestData;
+    
     // Pass through to delegate and capture headers after execution
     delegate.requestSpec(spec -> {
       // Execute the original request spec
@@ -62,11 +65,16 @@ public class OpenApiTestHttpClient {
       
       // Capture headers after configuration
       spec.getHeaders().getNames().forEach(name -> {
-        pendingRequestData.headers.put(name, spec.getHeaders().get(name));
+        String value = spec.getHeaders().get(name);
+        if (value != null && captureData != null) {
+          captureData.headers.put(name, value);
+        }
       });
       
       // Capture content type
-      pendingRequestData.contentType = spec.getHeaders().get("Content-Type");
+      if (captureData != null) {
+        captureData.contentType = spec.getHeaders().get("Content-Type");
+      }
     });
     
     return this;
