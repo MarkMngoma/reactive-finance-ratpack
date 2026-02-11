@@ -16,6 +16,7 @@ import ratpack.server.RatpackServer;
 import ratpack.server.ServerConfigBuilder;
 import za.co.ratpack.finance.reactive.config.CustomServerConfig;
 import za.co.ratpack.finance.reactive.config.JdbcConfig;
+import za.co.ratpack.finance.reactive.functions.handlers.ApiDocsHandler;
 import za.co.ratpack.finance.reactive.functions.handlers.LoggingMDCHandler;
 import za.co.ratpack.finance.reactive.functions.handlers.ServerResponseHandler;
 import za.co.ratpack.finance.reactive.guice.modules.FunctionHandlerModule;
@@ -68,6 +69,8 @@ public class ServerCommand {
       .all(RequestLogger.ncsa())
       .all(LoggingMDCHandler.class)
       .all(ServerResponseHandler.class)
+      .path("api-docs", ApiDocsHandler.class)
+      .path("api-docs/:filename", ApiDocsHandler.class)
       .prefix("v1", FinanceActionChain.class);
   }
 
