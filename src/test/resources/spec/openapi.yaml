@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  title: Reactive Finance Ratpack API
+  description: Auto-generated from integration tests
+  version: 1.0.0
+paths:
+  /v1/WriteModificationCurrencyResource:
+    put:
+      summary: PUT /v1/WriteModificationCurrencyResource
+      operationId: givenExistingCurrencyWhenModifyingThenVerifyNoContentResponse
+      responses:
+        "500":
+          description: Internal Server Error
+  /v1/QueryCurrencyResource/{currencyCode}:
+    get:
+      summary: "GET /v1/QueryCurrencyResource/{currencyCode}"
+      operationId: givenCurrencyExistsWhenQueryingByCodeThenVerifyResult
+      parameters:
+      - name: currencyCode
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                    format: int32
+                  message:
+                    type: string
+  /v1/QueryCurrencyResource:
+    get:
+      summary: GET /v1/QueryCurrencyResource
+      operationId: givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+  /v1/WriteBatchCurrencyResource:
+    post:
+      summary: POST /v1/WriteBatchCurrencyResource
+      operationId: givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+  /v1/WriteCurrencyResource:
+    post:
+      summary: POST /v1/WriteCurrencyResource
+      operationId: givenValidCurrencyWhenCreatingThenVerifyCreatedResponse
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+components:
+  schemas: {}

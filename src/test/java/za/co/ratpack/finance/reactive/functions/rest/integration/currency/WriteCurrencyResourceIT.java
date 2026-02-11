@@ -64,7 +64,6 @@ public class WriteCurrencyResourceIT extends RatpackServerBaseIT {
     // Verify response
     assertNotNull(receivedResponse);
     assertNotNull(receivedResponse.getBody().getText());
-    // Note: The actual status might be 200 OK instead of 201 Created based on implementation
-    assertEquals(Status.OK, receivedResponse.getStatus());
+    assertEquals(Status.CREATED, receivedResponse.getStatus());
   }
 }

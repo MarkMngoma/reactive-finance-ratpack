@@ -24,6 +24,7 @@ public class OpenApiTestHttpClient {
   private static final Logger LOG = LoggerFactory.getLogger(OpenApiTestHttpClient.class);
   private static final Pattern UUID_PATTERN = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
   private static final Pattern NUMERIC_PATTERN = Pattern.compile("^\\d+$");
+  private static final Pattern CURRENCY_CODE_PATTERN = Pattern.compile("^[A-Z]{3}$");
   
   private final TestHttpClient delegate;
   private final OpenApiCapture capture;
@@ -172,6 +173,10 @@ public class OpenApiTestHttpClient {
       // Check for numeric ID (but not in first position after host)
       else if (i > 0 && NUMERIC_PATTERN.matcher(segment).matches()) {
         normalized.append("{id}");
+      }
+      // Check for currency code pattern (3 uppercase letters)
+      else if (CURRENCY_CODE_PATTERN.matcher(segment).matches()) {
+        normalized.append("{currencyCode}");
       }
       // Otherwise keep as-is
       else {
