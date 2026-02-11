@@ -81,6 +81,11 @@ dependencies {
   testImplementation "io.ratpack:ratpack-test:${ratpackVersion}"
   testImplementation "commons-dbutils:commons-dbutils:${dbUtilsVersion}"
   testImplementation "uk.org.webcompere:system-stubs-jupiter:${systemStubsVersion}"
+  
+  // OpenAPI/Swagger Dependencies
+  testImplementation "io.swagger.core.v3:swagger-models:${swaggerVersion}"
+  testImplementation "io.swagger.core.v3:swagger-core:${swaggerVersion}"
+  testImplementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonYamlVersion}"
 }
 
 ext {
