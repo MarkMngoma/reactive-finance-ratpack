@@ -8,6 +8,7 @@ import ratpack.http.Status;
 import za.co.ratpack.finance.reactive.functions.rest.integration.BatchCurrencyRequestUtil;
 import za.co.ratpack.finance.reactive.functions.rest.integration.RatpackServerBaseIT;
 import za.co.ratpack.finance.reactive.functions.rest.integration.RatpackTestServerExtension;
+import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.DocumentApi;
 import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.OpenApiSpecExtension;
 import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.OpenApiTestHttpClient;
 
@@ -32,14 +33,17 @@ public class WriteBatchCurrencyResourceIT extends RatpackServerBaseIT {
   }
 
   @Test
+  @DocumentApi(
+    description = "Creates multiple currencies in batch from JSON request body",
+    path = "/v1/WriteBatchCurrencyResource",
+    summary = "Create batch currencies",
+    tags = {"WriteBatch", "Currency"}
+  )
   void givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
     apiClient.setTestContext("WriteBatchCurrencyResourceIT", "givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults");
     
-    String requestBody = BatchCurrencyRequestUtil.currencyRequest();
-    
     var receivedResponse = apiClient
-      .withBody(requestBody)  // Capture request body for OpenAPI spec
       .requestSpec(BatchCurrencyRequestUtil::constructCurrencyRequest)
       .post("/v1/WriteBatchCurrencyResource");
 

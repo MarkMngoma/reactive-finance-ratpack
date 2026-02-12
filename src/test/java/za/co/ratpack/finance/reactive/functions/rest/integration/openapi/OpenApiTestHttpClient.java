@@ -30,6 +30,10 @@ public class OpenApiTestHttpClient {
   private final OpenApiCapture capture;
   private String testClassName;
   private String testMethodName;
+  private String annotationPath;
+  private String annotationSummary;
+  private String annotationDescription;
+  private String[] annotationTags;
   private RequestCaptureData pendingRequestData;
   
   public OpenApiTestHttpClient(TestHttpClient delegate) {
@@ -46,8 +50,22 @@ public class OpenApiTestHttpClient {
   }
   
   /**
+   * Sets the current test context including annotation data.
+   */
+  public void setTestContext(String className, String methodName, 
+                            String annotationPath, String annotationSummary, 
+                            String annotationDescription, String[] annotationTags) {
+    this.testClassName = className;
+    this.testMethodName = methodName;
+    this.annotationPath = annotationPath;
+    this.annotationSummary = annotationSummary;
+    this.annotationDescription = annotationDescription;
+    this.annotationTags = annotationTags;
+  }
+  
+  /**
    * Supports requestSpec() chaining like TestHttpClient.
-   * Captures request headers. Request body should be set using the helper method.
+   * Captures request headers and body automatically.
    */
   public OpenApiTestHttpClient requestSpec(Action<? super RequestSpec> requestSpec) {
     // Initialize pending request data
@@ -58,7 +76,7 @@ public class OpenApiTestHttpClient {
     // Capture the reference for use in the lambda
     final RequestCaptureData captureData = pendingRequestData;
     
-    // Pass through to delegate and capture headers after execution
+    // Pass through to delegate and capture headers and body after execution
     delegate.requestSpec(spec -> {
       // Execute the original request spec
       requestSpec.execute(spec);
@@ -74,6 +92,19 @@ public class OpenApiTestHttpClient {
       // Capture content type
       if (captureData != null) {
         captureData.contentType = spec.getHeaders().get("Content-Type");
+        
+        // AUTO-CAPTURE REQUEST BODY from spec
+        try {
+          if (spec.getBody() != null && spec.getBody().getBytes() != null) {
+            byte[] bodyBytes = spec.getBody().getBytes();
+            if (bodyBytes.length > 0) {
+              captureData.body = new String(bodyBytes, java.nio.charset.StandardCharsets.UTF_8);
+              LOG.debug("Auto-captured request body: {} bytes", bodyBytes.length);
+            }
+          }
+        } catch (Exception e) {
+          LOG.warn("Failed to auto-capture request body from spec", e);
+        }
       }
     });
     
@@ -187,6 +218,10 @@ public class OpenApiTestHttpClient {
         .responseBody(response.getBody().getText())
         .testClassName(testClassName)
         .testMethodName(testMethodName)
+        .annotationPath(annotationPath)
+        .annotationSummary(annotationSummary)
+        .annotationDescription(annotationDescription)
+        .annotationTags(annotationTags)
         .build();
       
       capture.record(interaction);

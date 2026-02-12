@@ -144,7 +144,12 @@ public class OpenApiSpecWriter {
     }
     
     CapturedInteraction sample = interactions.get(0);
-    String path = sample.getNormalizedPath();
+    
+    // Use annotation path if provided, otherwise use normalized path
+    String path = (sample.getAnnotationPath() != null && !sample.getAnnotationPath().isEmpty()) 
+                  ? sample.getAnnotationPath() 
+                  : sample.getNormalizedPath();
+    
     String method = sample.getMethod().toLowerCase();
     
     // Get or create PathItem
@@ -178,12 +183,29 @@ public class OpenApiSpecWriter {
     String operationId = generateOperationId(sample);
     operation.setOperationId(operationId);
     
-    // Set summary and description if available
-    String summary = generateSummary(sample);
+    // Set summary - use annotation if provided, otherwise generate
+    String summary = (sample.getAnnotationSummary() != null && !sample.getAnnotationSummary().isEmpty())
+                     ? sample.getAnnotationSummary()
+                     : generateSummary(sample);
     operation.setSummary(summary);
     
+    // Set description if provided in annotation
+    if (sample.getAnnotationDescription() != null && !sample.getAnnotationDescription().isEmpty()) {
+      operation.setDescription(sample.getAnnotationDescription());
+    }
+    
+    // Set tags if provided in annotation
+    if (sample.getAnnotationTags() != null && sample.getAnnotationTags().length > 0) {
+      operation.setTags(java.util.Arrays.asList(sample.getAnnotationTags()));
+    }
+    
+    // Use annotation path if provided, otherwise use normalized path
+    String pathForParams = (sample.getAnnotationPath() != null && !sample.getAnnotationPath().isEmpty())
+                           ? sample.getAnnotationPath()
+                           : sample.getNormalizedPath();
+    
     // Extract path parameters
-    List<Parameter> parameters = extractPathParameters(sample.getNormalizedPath());
+    List<Parameter> parameters = extractPathParameters(pathForParams);
     
     // Add common request headers as parameters (with multiple examples from all interactions)
     parameters.addAll(extractCommonHeaders(allInteractions));

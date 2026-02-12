@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -34,10 +35,36 @@ public class OpenApiSpecExtension implements AfterAllCallback, BeforeEachCallbac
       .map(method -> method.getName())
       .orElse("unknownMethod");
     
+    // Check for @DocumentApi annotation
+    String annotationPath = "";
+    String annotationSummary = "";
+    String annotationDescription = "";
+    String[] annotationTags = new String[0];
+    
+    if (context.getTestMethod().isPresent()) {
+      Method method = context.getTestMethod().get();
+      DocumentApi documentApi = method.getAnnotation(DocumentApi.class);
+      
+      if (documentApi != null) {
+        annotationPath = documentApi.path();
+        annotationSummary = documentApi.summary();
+        annotationDescription = documentApi.description();
+        annotationTags = documentApi.tags();
+        
+        LOG.debug("Found @DocumentApi on {}.{}: path={}, summary={}, description={}, tags={}", 
+                 testClassName, testMethodName, annotationPath, annotationSummary, 
+                 annotationDescription, String.join(",", annotationTags));
+      }
+    }
+    
     // Store in extension context for use by test
     ExtensionContext.Store store = context.getStore(ExtensionContext.Namespace.create(getClass()));
     store.put("testClassName", testClassName);
     store.put("testMethodName", testMethodName);
+    store.put("annotationPath", annotationPath);
+    store.put("annotationSummary", annotationSummary);
+    store.put("annotationDescription", annotationDescription);
+    store.put("annotationTags", annotationTags);
     
     LOG.debug("BeforeEach: {} - {}", testClassName, testMethodName);
   }

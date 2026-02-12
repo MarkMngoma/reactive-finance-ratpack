@@ -74,4 +74,24 @@ public class CapturedInteraction {
    * Test method name (for operationId generation).
    */
   private String testMethodName;
+  
+  /**
+   * Explicit path from @DocumentApi annotation (if provided).
+   */
+  private String annotationPath;
+  
+  /**
+   * Summary from @DocumentApi annotation (if provided).
+   */
+  private String annotationSummary;
+  
+  /**
+   * Description from @DocumentApi annotation (if provided).
+   */
+  private String annotationDescription;
+  
+  /**
+   * Tags from @DocumentApi annotation (if provided).
+   */
+  private String[] annotationTags;
 }
