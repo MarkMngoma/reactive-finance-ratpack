@@ -24,11 +24,18 @@ import java.util.Map;
  * }
  * </pre>
  *
+ * Note: This extension uses ThreadLocal for writer storage. JUnit 5 typically runs
+ * all test methods of a class on the same thread, so afterAll() will see all captured
+ * interactions. If tests are forced to run in parallel threads (not the default),
+ * each thread would generate its own spec file.
+ *
  * @author markmngoma
  */
 public class OpenApiSpecExtension implements BeforeEachCallback, AfterEachCallback, AfterAllCallback {
     private static final Logger logger = LoggerFactory.getLogger(OpenApiSpecExtension.class);
     
+    // ThreadLocal to support potential parallel test execution
+    // In standard JUnit 5 usage, all tests in a class run on the same thread
     private static final ThreadLocal<OpenApiSpecWriter> writerThreadLocal = new ThreadLocal<>();
     
     @Override

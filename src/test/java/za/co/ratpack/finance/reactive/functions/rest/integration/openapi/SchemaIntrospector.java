@@ -104,11 +104,18 @@ public class SchemaIntrospector {
     }
     
     /**
-     * Simplified required check - can be enhanced based on validation annotations.
+     * Simplified required check - currently only marks primitive types as required.
+     * 
+     * LIMITATION: This is a basic implementation. In production, this should:
+     * - Check for @NotNull, @NotEmpty, @NotBlank Jakarta validation annotations
+     * - Consider wrapper types (Integer, Boolean) which can be null
+     * - Handle @JsonProperty(required=true) Jackson annotations
+     * 
+     * For this test infrastructure, we keep it simple to avoid false positives.
      */
     private boolean isRequiredField(Field field) {
-        // For now, consider non-primitive fields as optional
-        // In a real implementation, check for @NotNull, @NotEmpty, etc.
+        // Only mark primitive types as required (they can't be null in Java)
+        // Wrapper types and objects are considered optional unless annotated
         return field.getType().isPrimitive();
     }
     
@@ -144,8 +151,20 @@ public class SchemaIntrospector {
             ParameterizedType pType = (ParameterizedType) type;
             Type[] typeArgs = pType.getActualTypeArguments();
             if (typeArgs.length > 0) {
-                Class<?> itemClass = (Class<?>) typeArgs[0];
-                schema.put("items", introspectType(itemClass));
+                Type itemType = typeArgs[0];
+                
+                // Handle nested generics (e.g., List<List<String>>)
+                if (itemType instanceof ParameterizedType) {
+                    schema.put("items", introspectCollection(itemType));
+                } else if (itemType instanceof Class) {
+                    Class<?> itemClass = (Class<?>) itemType;
+                    schema.put("items", introspectType(itemClass));
+                } else {
+                    // Fallback for TypeVariable or other complex types
+                    Map<String, Object> items = new LinkedHashMap<>();
+                    items.put("type", "object");
+                    schema.put("items", items);
+                }
             } else {
                 // Fallback for raw collection
                 Map<String, Object> items = new LinkedHashMap<>();

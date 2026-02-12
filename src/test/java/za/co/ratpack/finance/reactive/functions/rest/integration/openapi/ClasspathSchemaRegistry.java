@@ -141,10 +141,15 @@ public class ClasspathSchemaRegistry {
                 return;
             }
             
-            // Register by simple name
-            classNameRegistry.put(clazz.getSimpleName(), clazz);
+            // Register by simple name (with collision detection)
+            String simpleName = clazz.getSimpleName();
+            if (classNameRegistry.containsKey(simpleName)) {
+                logger.warn("Simple name collision detected for '{}': {} and {}. Using field signature matching instead.",
+                           simpleName, classNameRegistry.get(simpleName).getName(), clazz.getName());
+            }
+            classNameRegistry.put(simpleName, clazz);
             
-            // Register by field signature
+            // Register by field signature (primary matching mechanism)
             fieldSignatureRegistry.put(fieldNames, clazz);
             classFieldsCache.put(clazz, fieldNames);
             
@@ -200,6 +205,8 @@ public class ClasspathSchemaRegistry {
         }
         
         // Find best subset match
+        // Scoring favors classes with fewer extra fields (higher specificity)
+        // E.g., JSON {a,b} matches ClassA{a,b,c} with score 0.67 better than ClassB{a,b,c,d} with score 0.5
         Class<?> bestMatch = null;
         double bestScore = 0.0;
         
@@ -208,7 +215,7 @@ public class ClasspathSchemaRegistry {
             
             // Check if JSON fields are a subset of class fields
             if (classFields.containsAll(jsonFieldNames)) {
-                // Calculate overlap percentage
+                // Calculate overlap percentage (higher = more specific match)
                 double score = (double) jsonFieldNames.size() / classFields.size();
                 
                 if (score > bestScore) {
