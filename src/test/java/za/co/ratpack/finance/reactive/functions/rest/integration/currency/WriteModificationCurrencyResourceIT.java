@@ -80,6 +80,7 @@ public class WriteModificationCurrencyResourceIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
+      .withBody(modifyRequest)
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {

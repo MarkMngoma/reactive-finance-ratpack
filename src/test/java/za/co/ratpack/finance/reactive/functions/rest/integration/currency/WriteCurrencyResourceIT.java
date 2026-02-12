@@ -55,6 +55,7 @@ public class WriteCurrencyResourceIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
+      .withBody(currencyRequest)
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {

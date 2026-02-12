@@ -93,18 +93,9 @@ public class OpenApiTestHttpClient {
       if (captureData != null) {
         captureData.contentType = spec.getHeaders().get("Content-Type");
         
-        // AUTO-CAPTURE REQUEST BODY from spec
-        try {
-          if (spec.getBody() != null && spec.getBody().getBytes() != null) {
-            byte[] bodyBytes = spec.getBody().getBytes();
-            if (bodyBytes.length > 0) {
-              captureData.body = new String(bodyBytes, java.nio.charset.StandardCharsets.UTF_8);
-              LOG.debug("Auto-captured request body: {} bytes", bodyBytes.length);
-            }
-          }
-        } catch (Exception e) {
-          LOG.warn("Failed to auto-capture request body from spec", e);
-        }
+        // Note: Cannot auto-capture request body from RequestSpec because Body interface
+        // is write-only (for setting content) and doesn't provide methods to read back.
+        // Use .withBody() method explicitly to capture request bodies.
       }
     });
     

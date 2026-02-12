@@ -58,6 +58,7 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
+      .withBody(currencyRequest)
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {
@@ -98,6 +99,7 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
+      .withBody(currencyRequest)
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {
@@ -138,6 +140,7 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
+      .withBody(currencyRequest)
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {
