@@ -8,6 +8,7 @@ import ratpack.http.Status;
 import za.co.ratpack.finance.reactive.functions.rest.integration.BatchCurrencyRequestUtil;
 import za.co.ratpack.finance.reactive.functions.rest.integration.RatpackServerBaseIT;
 import za.co.ratpack.finance.reactive.functions.rest.integration.RatpackTestServerExtension;
+import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.DocumentApi;
 import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.OpenApiSpecExtension;
 import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.OpenApiTestHttpClient;
 
@@ -34,6 +35,12 @@ public class QueryCurrencyResourceIT extends RatpackServerBaseIT {
   }
   
   @Test
+  @DocumentApi(
+    description = "Read batch currencies from JSON",
+    path = "/v1/QueryCurrencyResource",
+    summary = "Query all currencies",
+    tags = {"QueryBatch"}
+  )
   void givenCurrenciesExistWhenQueryingAllThenVerifyResults() {
     // First create some currencies
     testHttpClient
@@ -51,6 +58,12 @@ public class QueryCurrencyResourceIT extends RatpackServerBaseIT {
   }
   
   @Test
+  @DocumentApi(
+    description = "Query a single currency by its currency code",
+    path = "/v1/QueryCurrencyResource/{currencyCode}",
+    summary = "Query currency by code",
+    tags = {"Query"}
+  )
   void givenCurrencyExistsWhenQueryingByCodeThenVerifyResult() {
     // First create some currencies
     testHttpClient

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import ratpack.http.Status;
 import za.co.ratpack.finance.reactive.functions.rest.integration.RatpackServerBaseIT;
 import za.co.ratpack.finance.reactive.functions.rest.integration.RatpackTestServerExtension;
+import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.DocumentApi;
 import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.OpenApiSpecExtension;
 import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.OpenApiTestHttpClient;
 
@@ -36,6 +37,12 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
   }
   
   @Test
+  @DocumentApi(
+    description = "Successful currency creation with 201 status",
+    path = "/v1/WriteCurrencyResource",
+    summary = "Create currency - success scenario",
+    tags = {"Write", "Currency", "Examples"}
+  )
   void scenarioSuccessfulCreation() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
     apiClient.setTestContext("WriteCurrencyMultipleStatusCodesIT", "scenarioSuccessfulCreation");
@@ -51,7 +58,6 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
-      .withBody(currencyRequest)  // Capture request body for OpenAPI spec
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {
@@ -71,6 +77,12 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
   }
   
   @Test
+  @DocumentApi(
+    description = "Another successful currency creation showing multiple examples",
+    path = "/v1/WriteCurrencyResource",
+    summary = "Create currency - EUR example",
+    tags = {"Write", "Currency", "Examples"}
+  )
   void scenarioSuccessfulCreationAnotherCurrency() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
     apiClient.setTestContext("WriteCurrencyMultipleStatusCodesIT", "scenarioSuccessfulCreationAnotherCurrency");
@@ -86,7 +98,6 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
-      .withBody(currencyRequest)  // Capture request body for OpenAPI spec
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {
@@ -106,6 +117,12 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
   }
   
   @Test
+  @DocumentApi(
+    description = "Third currency creation example demonstrating multiple request/response examples",
+    path = "/v1/WriteCurrencyResource",
+    summary = "Create currency - GBP example",
+    tags = {"Write", "Currency", "Examples"}
+  )
   void scenarioSuccessfulCreationThirdExample() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
     apiClient.setTestContext("WriteCurrencyMultipleStatusCodesIT", "scenarioSuccessfulCreationThirdExample");
@@ -121,7 +138,6 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
-      .withBody(currencyRequest)  // Capture request body for OpenAPI spec
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {

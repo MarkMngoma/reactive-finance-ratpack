@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import ratpack.http.Status;
 import za.co.ratpack.finance.reactive.functions.rest.integration.RatpackServerBaseIT;
 import za.co.ratpack.finance.reactive.functions.rest.integration.RatpackTestServerExtension;
+import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.DocumentApi;
 import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.OpenApiSpecExtension;
 import za.co.ratpack.finance.reactive.functions.rest.integration.openapi.OpenApiTestHttpClient;
 
@@ -32,6 +33,12 @@ public class WriteModificationCurrencyResourceIT extends RatpackServerBaseIT {
   }
   
   @Test
+  @DocumentApi(
+    description = "Modify an existing currency resource with updated JSON payload",
+    path = "/v1/WriteModificationCurrencyResource",
+    summary = "Modify existing currency",
+    tags = {"Write", "Currency", "Modification"}
+  )
   void givenExistingCurrencyWhenModifyingThenVerifyNoContentResponse() {
     // First create a currency
     String createRequest = """
@@ -73,7 +80,6 @@ public class WriteModificationCurrencyResourceIT extends RatpackServerBaseIT {
       """;
     
     var receivedResponse = apiClient
-      .withBody(modifyRequest)  // Capture request body for OpenAPI spec
       .requestSpec(requestSpec -> {
         try {
           requestSpec.headers(httpHeaders -> {
