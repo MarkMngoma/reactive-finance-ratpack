@@ -27,7 +27,6 @@ public class CurrencyRequest implements Serializable {
                   "For example: USD=840, EUR=978, GBP=826, ZAR=710. " +
                   "This is a required field and must be a positive integer.",
     example = "840",
-    required = true,
     format = "int32"
   )
   private Integer currencyId;
@@ -38,8 +37,7 @@ public class CurrencyRequest implements Serializable {
                   "This is a globally recognized standard for currency identification. " +
                   "Examples: USD (US Dollar), EUR (Euro), GBP (British Pound), ZAR (South African Rand). " +
                   "This is a required field and must be exactly 3 characters.",
-    example = "USD",
-    required = true
+    example = "USD"
   )
   private String currencyCode;
 
@@ -49,8 +47,7 @@ public class CurrencyRequest implements Serializable {
                   "This is how the currency will be displayed to users. " +
                   "Examples: 'US Dollar', 'Euro', 'British Pound Sterling', 'South African Rand'. " +
                   "This is a required field and should be clear and unambiguous.",
-    example = "US Dollar",
-    required = true
+    example = "US Dollar"
   )
   private String currencyName;
 
@@ -60,8 +57,7 @@ public class CurrencyRequest implements Serializable {
                   "This is typically shown before or after amounts in transactions and displays. " +
                   "Examples: '$' (Dollar), '€' (Euro), '£' (Pound), 'R' (Rand). " +
                   "This is a required field and can be 1-3 characters.",
-    example = "$",
-    required = true
+    example = "$"
   )
   private String currencySymbol;
 
@@ -71,8 +67,7 @@ public class CurrencyRequest implements Serializable {
                   "This helps users quickly identify the currency's origin. " +
                   "Examples: '🇺🇸' (US), '🇪🇺' (EU), '🇬🇧' (UK), '🇿🇦' (South Africa), or use country codes like 'US', 'EU', 'GB', 'ZA'. " +
                   "This is a required field and aids in visual currency recognition.",
-    example = "🇺🇸",
-    required = true
+    example = "🇺🇸"
   )
   private String currencyFlag;
 }

@@ -30,8 +30,7 @@ public class BatchCurrencyRequest implements Serializable {
                   "Minimum of 1 currency is required, and there is typically a maximum limit (e.g., 100) to prevent excessive load. " +
                   "Use this endpoint when you need to create multiple currencies efficiently in a single request.",
     example = "[{\"currencyId\": 840, \"currencyCode\": \"USD\", \"currencyName\": \"US Dollar\", \"currencySymbol\": \"$\", \"currencyFlag\": \"🇺🇸\"}, " +
-              "{\"currencyId\": 978, \"currencyCode\": \"EUR\", \"currencyName\": \"Euro\", \"currencySymbol\": \"€\", \"currencyFlag\": \"🇪🇺\"}]",
-    required = true
+              "{\"currencyId\": 978, \"currencyCode\": \"EUR\", \"currencyName\": \"Euro\", \"currencySymbol\": \"€\", \"currencyFlag\": \"🇪🇺\"}]"
   )
   private List<CurrencyRequest> batchCurrencies;
 }

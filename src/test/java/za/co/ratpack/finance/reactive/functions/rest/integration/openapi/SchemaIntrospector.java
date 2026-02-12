@@ -172,17 +172,12 @@ public class SchemaIntrospector {
   }
   
   /**
-   * Checks if a field is required based on @NotNull annotation or @Schema(required=true).
+   * Checks if a field is required based on @NotNull annotation.
+   * Note: @Schema(required=true) is deprecated, so we only check @NotNull.
    */
   private static boolean isFieldRequired(Field field) {
     // Check @NotNull annotation
     if (field.getAnnotation(NotNull.class) != null) {
-      return true;
-    }
-    
-    // Check @Schema annotation
-    Schema schemaAnnotation = field.getAnnotation(Schema.class);
-    if (schemaAnnotation != null && schemaAnnotation.required()) {
       return true;
     }
     
