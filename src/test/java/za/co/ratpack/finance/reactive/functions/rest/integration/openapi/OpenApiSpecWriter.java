@@ -53,6 +53,7 @@ public class OpenApiSpecWriter {
   private final String specPath;
   private final String title;
   private final String version;
+  private OpenAPI openAPI; // Store reference for schema registration
   
   public OpenApiSpecWriter(String specPath, String title, String version) {
     this.specPath = specPath;
@@ -66,7 +67,7 @@ public class OpenApiSpecWriter {
    */
   public void writeSpec(List<CapturedInteraction> interactions) {
     try {
-      OpenAPI openAPI = loadExistingSpec();
+      openAPI = loadExistingSpec();
       
       if (openAPI == null) {
         openAPI = createNewSpec();
@@ -403,11 +404,30 @@ public class OpenApiSpecWriter {
     
     CapturedInteraction sample = interactions.get(0);
     
-    // Try to infer schema from JSON body
+    // Try to infer schema from JSON body with annotation support
     if (sample.getRequestBody() != null && isJson(sample.getRequestContentType())) {
       try {
-        Schema<?> schema = inferSchemaFromJson(sample.getRequestBody());
-        mediaType.setSchema(schema);
+        // First, try to detect known DTO classes and use SchemaIntrospector
+        Schema<?> schema = tryIntrospectKnownClass(sample.getRequestBody());
+        
+        if (schema == null) {
+          // Fallback to JSON inference
+          schema = inferSchemaFromJson(sample.getRequestBody());
+        }
+        
+        // Register schema in components if it has a name
+        if (schema.getName() != null) {
+          String schemaName = schema.getName();
+          if (!openAPI.getComponents().getSchemas().containsKey(schemaName)) {
+            openAPI.getComponents().addSchemas(schemaName, schema);
+          }
+          // Create a reference to the schema
+          Schema<?> refSchema = new Schema<>();
+          refSchema.set$ref("#/components/schemas/" + schemaName);
+          mediaType.setSchema(refSchema);
+        } else {
+          mediaType.setSchema(schema);
+        }
       } catch (Exception e) {
         LOG.warn("Could not infer schema from request body", e);
         mediaType.setSchema(new ObjectSchema());
@@ -570,6 +590,46 @@ public class OpenApiSpecWriter {
     }
     
     return responses;
+  }
+  
+  
+  /**
+   * Tries to introspect known DTO classes using reflection and @Schema annotations.
+   * Returns null if the class cannot be detected.
+   */
+  private Schema<?> tryIntrospectKnownClass(String jsonContent) {
+    try {
+      JsonNode node = jsonMapper.readTree(jsonContent);
+      
+      // Detect CurrencyRequest pattern
+      if (node.isObject() && node.has("currencyId") && node.has("currencyCode") && 
+          node.has("currencyName") && node.has("currencySymbol") && node.has("currencyFlag")) {
+        LOG.info("Detected CurrencyRequest pattern, using SchemaIntrospector");
+        Class<?> currencyRequestClass = Class.forName("za.co.ratpack.finance.reactive.rest.v1.dto.CurrencyRequest");
+        return SchemaIntrospector.introspectClass(currencyRequestClass, "CurrencyRequest");
+      }
+      
+      // Detect BatchCurrencyRequest pattern
+      if (node.isObject() && node.has("batchCurrencies") && node.get("batchCurrencies").isArray()) {
+        LOG.info("Detected BatchCurrencyRequest pattern, using SchemaIntrospector");
+        
+        // Register CurrencyRequest schema first (it's referenced by BatchCurrencyRequest)
+        Class<?> currencyRequestClass = Class.forName("za.co.ratpack.finance.reactive.rest.v1.dto.CurrencyRequest");
+        Schema<?> currencySchema = SchemaIntrospector.introspectClass(currencyRequestClass, "CurrencyRequest");
+        if (!openAPI.getComponents().getSchemas().containsKey("CurrencyRequest")) {
+          openAPI.getComponents().addSchemas("CurrencyRequest", currencySchema);
+        }
+        
+        // Now register BatchCurrencyRequest
+        Class<?> batchCurrencyRequestClass = Class.forName("za.co.ratpack.finance.reactive.rest.v1.dto.BatchCurrencyRequest");
+        return SchemaIntrospector.introspectClass(batchCurrencyRequestClass, "BatchCurrencyRequest");
+      }
+      
+    } catch (Exception e) {
+      LOG.debug("Could not introspect known class: {}", e.getMessage());
+    }
+    
+    return null;
   }
   
   /**

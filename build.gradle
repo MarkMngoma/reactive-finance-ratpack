@@ -86,6 +86,7 @@ dependencies {
   testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
   
   // OpenAPI/Swagger Dependencies
+  implementation "io.swagger.core.v3:swagger-annotations:${swaggerVersion}"
   testImplementation "io.swagger.core.v3:swagger-models:${swaggerVersion}"
   testImplementation "io.swagger.core.v3:swagger-core:${swaggerVersion}"
   testImplementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonYamlVersion}"
