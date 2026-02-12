@@ -596,13 +596,22 @@ public class OpenApiSpecWriter {
   /**
    * Tries to introspect known DTO classes using reflection and @Schema annotations.
    * Returns null if the class cannot be detected.
+   * Handles both request DTOs and response entity models.
    */
   private Schema<?> tryIntrospectKnownClass(String jsonContent) {
     try {
       JsonNode node = jsonMapper.readTree(jsonContent);
       
-      // Detect CurrencyRequest pattern
-      if (node.isObject() && node.has("currencyId") && node.has("currencyCode") && 
+      // Detect CurrencyEntityModel pattern (response entity - has id field + currency fields)
+      if (node.isObject() && node.has("id") && node.has("currencyId") && node.has("currencyCode") && 
+          node.has("currencyName") && node.has("currencySymbol") && node.has("currencyFlag")) {
+        LOG.info("Detected CurrencyEntityModel pattern (response entity), using SchemaIntrospector");
+        Class<?> entityClass = Class.forName("za.co.ratpack.finance.reactive.domain.mybatis.model.CurrencyEntityModel");
+        return SchemaIntrospector.introspectClass(entityClass, "CurrencyEntityModel");
+      }
+      
+      // Detect CurrencyRequest pattern (request DTO - no id field)
+      if (node.isObject() && !node.has("id") && node.has("currencyId") && node.has("currencyCode") && 
           node.has("currencyName") && node.has("currencySymbol") && node.has("currencyFlag")) {
         LOG.info("Detected CurrencyRequest pattern, using SchemaIntrospector");
         Class<?> currencyRequestClass = Class.forName("za.co.ratpack.finance.reactive.rest.v1.dto.CurrencyRequest");
@@ -623,6 +632,29 @@ public class OpenApiSpecWriter {
         // Now register BatchCurrencyRequest
         Class<?> batchCurrencyRequestClass = Class.forName("za.co.ratpack.finance.reactive.rest.v1.dto.BatchCurrencyRequest");
         return SchemaIntrospector.introspectClass(batchCurrencyRequestClass, "BatchCurrencyRequest");
+      }
+      
+      // Detect array of CurrencyEntityModel (list response)
+      if (node.isArray() && node.size() > 0) {
+        JsonNode firstItem = node.get(0);
+        if (firstItem.isObject() && firstItem.has("id") && firstItem.has("currencyId") && 
+            firstItem.has("currencyCode") && firstItem.has("currencyName")) {
+          LOG.info("Detected array of CurrencyEntityModel, using SchemaIntrospector");
+          
+          // Register CurrencyEntityModel schema
+          Class<?> entityClass = Class.forName("za.co.ratpack.finance.reactive.domain.mybatis.model.CurrencyEntityModel");
+          Schema<?> entitySchema = SchemaIntrospector.introspectClass(entityClass, "CurrencyEntityModel");
+          if (!openAPI.getComponents().getSchemas().containsKey("CurrencyEntityModel")) {
+            openAPI.getComponents().addSchemas("CurrencyEntityModel", entitySchema);
+          }
+          
+          // Return array schema with reference
+          io.swagger.v3.oas.models.media.ArraySchema arraySchema = new io.swagger.v3.oas.models.media.ArraySchema();
+          Schema<?> refSchema = new Schema<>();
+          refSchema.set$ref("#/components/schemas/CurrencyEntityModel");
+          arraySchema.setItems(refSchema);
+          return arraySchema;
+        }
       }
       
     } catch (Exception e) {
