@@ -20,11 +20,15 @@
     <script>
       var configuration = {
         spec: {
-            url: '/api-docs/openapi.yaml',
+            url: '/openapi.yaml',  // Different path for Docker Compose
          },
         theme: 'default',  // Classic theme as default
         darkMode: true,    // Enable dark mode toggle
         layout: 'classic', // Use classic layout
+        showSidebar: true, // Explicitly show sidebar
+        defaultOpenAllTags: true, // Expand all tags by default
+        tagsSorter: 'alpha', // Sort tags alphabetically
+        withDefaultFonts: true,
       }
 
       document.getElementById('api-reference').dataset.configuration = JSON.stringify(configuration)
