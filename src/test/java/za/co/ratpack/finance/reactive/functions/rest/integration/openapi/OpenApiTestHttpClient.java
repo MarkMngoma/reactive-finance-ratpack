@@ -47,6 +47,29 @@ public class OpenApiTestHttpClient {
   public void setTestContext(String className, String methodName) {
     this.testClassName = className;
     this.testMethodName = methodName;
+    
+    // Try to automatically extract @DocumentApi annotation data via reflection
+    try {
+      Class<?> testClass = Class.forName(className);
+      java.lang.reflect.Method[] methods = testClass.getDeclaredMethods();
+      for (java.lang.reflect.Method method : methods) {
+        if (method.getName().equals(methodName)) {
+          DocumentApi documentApi = method.getAnnotation(DocumentApi.class);
+          if (documentApi != null) {
+            this.annotationPath = documentApi.path();
+            this.annotationSummary = documentApi.summary();
+            this.annotationDescription = documentApi.description();
+            this.annotationTags = documentApi.tags();
+            LOG.debug("Auto-extracted @DocumentApi: path={}, summary={}, description={}, tags={}", 
+                     annotationPath, annotationSummary, annotationDescription, 
+                     annotationTags != null ? String.join(",", annotationTags) : "none");
+          }
+          break;
+        }
+      }
+    } catch (Exception e) {
+      LOG.warn("Failed to auto-extract @DocumentApi annotation for {}.{}", className, methodName, e);
+    }
   }
   
   /**
