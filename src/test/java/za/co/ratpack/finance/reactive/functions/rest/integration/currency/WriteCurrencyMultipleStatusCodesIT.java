@@ -45,7 +45,7 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
   )
   void scenarioSuccessfulCreation() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("WriteCurrencyMultipleStatusCodesIT", "scenarioSuccessfulCreation");
+    apiClient.setTestContext(this.getClass().getName(), "scenarioSuccessfulCreation");
     
     String currencyRequest = """
       {
@@ -86,7 +86,7 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
   )
   void scenarioSuccessfulCreationAnotherCurrency() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("WriteCurrencyMultipleStatusCodesIT", "scenarioSuccessfulCreationAnotherCurrency");
+    apiClient.setTestContext(this.getClass().getName(), "scenarioSuccessfulCreationAnotherCurrency");
     
     String currencyRequest = """
       {
@@ -127,7 +127,7 @@ public class WriteCurrencyMultipleStatusCodesIT extends RatpackServerBaseIT {
   )
   void scenarioSuccessfulCreationThirdExample() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("WriteCurrencyMultipleStatusCodesIT", "scenarioSuccessfulCreationThirdExample");
+    apiClient.setTestContext(this.getClass().getName(), "scenarioSuccessfulCreationThirdExample");
     
     String currencyRequest = """
       {

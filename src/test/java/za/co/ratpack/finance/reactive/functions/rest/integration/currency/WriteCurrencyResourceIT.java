@@ -42,7 +42,7 @@ public class WriteCurrencyResourceIT extends RatpackServerBaseIT {
   )
   void givenValidCurrencyWhenCreatingThenVerifyCreatedResponse() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("WriteCurrencyResourceIT", "givenValidCurrencyWhenCreatingThenVerifyCreatedResponse");
+    apiClient.setTestContext(this.getClass().getName(), "givenValidCurrencyWhenCreatingThenVerifyCreatedResponse");
     
     String currencyRequest = """
       {

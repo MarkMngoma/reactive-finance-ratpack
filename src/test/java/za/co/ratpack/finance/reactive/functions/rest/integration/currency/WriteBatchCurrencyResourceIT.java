@@ -41,7 +41,7 @@ public class WriteBatchCurrencyResourceIT extends RatpackServerBaseIT {
   )
   void givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("WriteBatchCurrencyResourceIT", "givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults");
+    apiClient.setTestContext(this.getClass().getName(), "givenRequestContainsSupportedCurrenciesWhenCreatingThenVerifyResults");
     
     var receivedResponse = apiClient
       .withBody(BatchCurrencyRequestUtil.currencyRequest())

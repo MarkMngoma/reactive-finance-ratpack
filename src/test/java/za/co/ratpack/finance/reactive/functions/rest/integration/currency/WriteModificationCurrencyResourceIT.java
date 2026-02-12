@@ -67,7 +67,7 @@ public class WriteModificationCurrencyResourceIT extends RatpackServerBaseIT {
     
     // Now modify it with OpenAPI capture
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("WriteModificationCurrencyResourceIT", "givenExistingCurrencyWhenModifyingThenVerifyNoContentResponse");
+    apiClient.setTestContext(this.getClass().getName(), "givenExistingCurrencyWhenModifyingThenVerifyNoContentResponse");
     
     String modifyRequest = """
       {

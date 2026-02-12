@@ -55,7 +55,7 @@ public class QueryCurrencyByCodeMultipleResponsesIT extends RatpackServerBaseIT 
     
     // Query a currency that should exist with OpenAPI capture
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("QueryCurrencyByCodeMultipleResponsesIT", "scenarioSuccessfulQuery");
+    apiClient.setTestContext(this.getClass().getName(), "scenarioSuccessfulQuery");
     
     var receivedResponse = apiClient.get("/v1/QueryCurrencyResource/ZAR");
     
@@ -66,7 +66,7 @@ public class QueryCurrencyByCodeMultipleResponsesIT extends RatpackServerBaseIT 
   @Test
   void scenarioNotFoundQuery() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("QueryCurrencyByCodeMultipleResponsesIT", "scenarioNotFoundQuery");
+    apiClient.setTestContext(this.getClass().getName(), "scenarioNotFoundQuery");
     
     // Query a currency that doesn't exist
     var receivedResponse = apiClient.get("/v1/QueryCurrencyResource/XXX");
@@ -78,7 +78,7 @@ public class QueryCurrencyByCodeMultipleResponsesIT extends RatpackServerBaseIT 
   @Test
   void scenarioNotFoundAnotherCurrency() {
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("QueryCurrencyByCodeMultipleResponsesIT", "scenarioNotFoundAnotherCurrency");
+    apiClient.setTestContext(this.getClass().getName(), "scenarioNotFoundAnotherCurrency");
     
     // Query another currency that doesn't exist - different response body
     var receivedResponse = apiClient.get("/v1/QueryCurrencyResource/YYY");

@@ -49,7 +49,7 @@ public class QueryCurrencyResourceIT extends RatpackServerBaseIT {
     
     // Now query all currencies with OpenAPI capture
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("QueryCurrencyResourceIT", "givenCurrenciesExistWhenQueryingAllThenVerifyResults");
+    apiClient.setTestContext(this.getClass().getName(), "givenCurrenciesExistWhenQueryingAllThenVerifyResults");
     
     var receivedResponse = apiClient.get("/v1/QueryCurrencyResource");
     
@@ -72,7 +72,7 @@ public class QueryCurrencyResourceIT extends RatpackServerBaseIT {
     
     // Now query a specific currency with OpenAPI capture
     OpenApiTestHttpClient apiClient = new OpenApiTestHttpClient(testHttpClient);
-    apiClient.setTestContext("QueryCurrencyResourceIT", "givenCurrencyExistsWhenQueryingByCodeThenVerifyResult");
+    apiClient.setTestContext(this.getClass().getName(), "givenCurrencyExistsWhenQueryingByCodeThenVerifyResult");
     
     var receivedResponse = apiClient.get("/v1/QueryCurrencyResource/ZAR");
     
