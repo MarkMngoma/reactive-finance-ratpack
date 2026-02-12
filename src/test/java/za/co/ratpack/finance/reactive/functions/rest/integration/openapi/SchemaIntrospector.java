@@ -40,7 +40,8 @@ public class SchemaIntrospector {
     LOG.debug("Introspecting class: {} for schema: {}", clazz.getName(), schemaName);
     
     ObjectSchema schema = new ObjectSchema();
-    schema.setName(schemaName);
+    // Note: Do NOT set schema.setName() - that's for property names, not schema identifiers
+    // The schema name is used as the key when registering in components.schemas
     
     // Read class-level @Schema annotation
     Schema classSchema = clazz.getAnnotation(Schema.class);

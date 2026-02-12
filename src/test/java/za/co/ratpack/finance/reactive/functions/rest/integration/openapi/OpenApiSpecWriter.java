@@ -408,24 +408,25 @@ public class OpenApiSpecWriter {
     if (sample.getRequestBody() != null && isJson(sample.getRequestContentType())) {
       try {
         // First, try to detect known DTO classes and use SchemaIntrospector
-        Schema<?> schema = tryIntrospectKnownClass(sample.getRequestBody());
+        SchemaWithName schemaWithName = tryIntrospectKnownClass(sample.getRequestBody());
         
-        if (schema == null) {
-          // Fallback to JSON inference
-          schema = inferSchemaFromJson(sample.getRequestBody());
-        }
-        
-        // Register schema in components if it has a name
-        if (schema.getName() != null) {
-          String schemaName = schema.getName();
-          if (!openAPI.getComponents().getSchemas().containsKey(schemaName)) {
-            openAPI.getComponents().addSchemas(schemaName, schema);
+        if (schemaWithName != null) {
+          // Register schema in components if it has a name
+          if (schemaWithName.name != null) {
+            if (!openAPI.getComponents().getSchemas().containsKey(schemaWithName.name)) {
+              openAPI.getComponents().addSchemas(schemaWithName.name, schemaWithName.schema);
+            }
+            // Create a reference to the schema
+            Schema<?> refSchema = new Schema<>();
+            refSchema.set$ref("#/components/schemas/" + schemaWithName.name);
+            mediaType.setSchema(refSchema);
+          } else {
+            // No name, use schema directly (e.g., for arrays)
+            mediaType.setSchema(schemaWithName.schema);
           }
-          // Create a reference to the schema
-          Schema<?> refSchema = new Schema<>();
-          refSchema.set$ref("#/components/schemas/" + schemaName);
-          mediaType.setSchema(refSchema);
         } else {
+          // Fallback to JSON inference
+          Schema<?> schema = inferSchemaFromJson(sample.getRequestBody());
           mediaType.setSchema(schema);
         }
       } catch (Exception e) {
@@ -541,12 +542,31 @@ public class OpenApiSpecWriter {
         Content content = new Content();
         MediaType mediaType = new MediaType();
         
-        // Try to infer schema from JSON body
-        Schema<?> schema = null;
+        // Try to infer schema from JSON body with annotation support
         if (isJson(sampleWithBody.getResponseContentType())) {
           try {
-            schema = inferSchemaFromJson(sampleWithBody.getResponseBody());
-            mediaType.setSchema(schema);
+            // First, try to detect known DTO classes and use SchemaIntrospector
+            SchemaWithName schemaWithName = tryIntrospectKnownClass(sampleWithBody.getResponseBody());
+            
+            if (schemaWithName != null) {
+              // Register schema in components if it has a name
+              if (schemaWithName.name != null) {
+                if (!openAPI.getComponents().getSchemas().containsKey(schemaWithName.name)) {
+                  openAPI.getComponents().addSchemas(schemaWithName.name, schemaWithName.schema);
+                }
+                // Create a reference to the schema
+                Schema<?> refSchema = new Schema<>();
+                refSchema.set$ref("#/components/schemas/" + schemaWithName.name);
+                mediaType.setSchema(refSchema);
+              } else {
+                // No name, use schema directly (e.g., for arrays)
+                mediaType.setSchema(schemaWithName.schema);
+              }
+            } else {
+              // Fallback to JSON inference
+              Schema<?> schema = inferSchemaFromJson(sampleWithBody.getResponseBody());
+              mediaType.setSchema(schema);
+            }
           } catch (Exception e) {
             LOG.warn("Could not infer schema from response body", e);
             mediaType.setSchema(new ObjectSchema());
@@ -594,11 +614,24 @@ public class OpenApiSpecWriter {
   
   
   /**
+   * Helper class to return both schema and its name from introspection.
+   */
+  private static class SchemaWithName {
+    final io.swagger.v3.oas.models.media.Schema<?> schema;
+    final String name;
+    
+    SchemaWithName(io.swagger.v3.oas.models.media.Schema<?> schema, String name) {
+      this.schema = schema;
+      this.name = name;
+    }
+  }
+  
+  /**
    * Tries to introspect known DTO classes using reflection and @Schema annotations.
    * Returns null if the class cannot be detected.
    * Handles both request DTOs and response entity models.
    */
-  private Schema<?> tryIntrospectKnownClass(String jsonContent) {
+  private SchemaWithName tryIntrospectKnownClass(String jsonContent) {
     try {
       JsonNode node = jsonMapper.readTree(jsonContent);
       
@@ -607,7 +640,8 @@ public class OpenApiSpecWriter {
           node.has("currencyName") && node.has("currencySymbol") && node.has("currencyFlag")) {
         LOG.info("Detected CurrencyEntityModel pattern (response entity), using SchemaIntrospector");
         Class<?> entityClass = Class.forName("za.co.ratpack.finance.reactive.domain.mybatis.model.CurrencyEntityModel");
-        return SchemaIntrospector.introspectClass(entityClass, "CurrencyEntityModel");
+        Schema<?> schema = SchemaIntrospector.introspectClass(entityClass, "CurrencyEntityModel");
+        return new SchemaWithName(schema, "CurrencyEntityModel");
       }
       
       // Detect CurrencyRequest pattern (request DTO - no id field)
@@ -615,7 +649,8 @@ public class OpenApiSpecWriter {
           node.has("currencyName") && node.has("currencySymbol") && node.has("currencyFlag")) {
         LOG.info("Detected CurrencyRequest pattern, using SchemaIntrospector");
         Class<?> currencyRequestClass = Class.forName("za.co.ratpack.finance.reactive.rest.v1.dto.CurrencyRequest");
-        return SchemaIntrospector.introspectClass(currencyRequestClass, "CurrencyRequest");
+        Schema<?> schema = SchemaIntrospector.introspectClass(currencyRequestClass, "CurrencyRequest");
+        return new SchemaWithName(schema, "CurrencyRequest");
       }
       
       // Detect BatchCurrencyRequest pattern
@@ -631,7 +666,8 @@ public class OpenApiSpecWriter {
         
         // Now register BatchCurrencyRequest
         Class<?> batchCurrencyRequestClass = Class.forName("za.co.ratpack.finance.reactive.rest.v1.dto.BatchCurrencyRequest");
-        return SchemaIntrospector.introspectClass(batchCurrencyRequestClass, "BatchCurrencyRequest");
+        Schema<?> schema = SchemaIntrospector.introspectClass(batchCurrencyRequestClass, "BatchCurrencyRequest");
+        return new SchemaWithName(schema, "BatchCurrencyRequest");
       }
       
       // Detect array of CurrencyEntityModel (list response)
@@ -653,7 +689,8 @@ public class OpenApiSpecWriter {
           Schema<?> refSchema = new Schema<>();
           refSchema.set$ref("#/components/schemas/CurrencyEntityModel");
           arraySchema.setItems(refSchema);
-          return arraySchema;
+          // Array schemas don't have their own name, they reference the item schema
+          return new SchemaWithName(arraySchema, null);
         }
       }
       

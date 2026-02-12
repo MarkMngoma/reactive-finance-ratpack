@@ -581,4 +581,91 @@ paths:
                 type: array
               example: []
 components:
-  schemas: {}
+  schemas:
+
+    CurrencyRequest:
+      type: object
+      description: Currency request object containing all required currency information
+      required:
+      - currencyId
+      - currencyCode
+      - currencyName
+      - currencySymbol
+      - currencyFlag
+      properties:
+        currencyId:
+          type: integer
+          format: int32
+          description: "Unique numeric identifier for the currency. This should be the ISO 4217 numeric code. For example: USD=840, EUR=978, GBP=826, ZAR=710. This is a required field and must be a positive integer."
+          example: "840"
+        currencyCode:
+          type: string
+          description: "Three-letter ISO 4217 currency code in uppercase. This is a globally recognized standard for currency identification. Examples: USD (US Dollar), EUR (Euro), GBP (British Pound), ZAR (South African Rand). This is a required field and must be exactly 3 characters."
+          example: "USD"
+        currencyName:
+          type: string
+          description: "Full descriptive name of the currency in English. This is how the currency will be displayed to users. Examples: 'US Dollar', 'Euro', 'British Pound Sterling', 'South African Rand'. This is a required field and should be clear and unambiguous."
+          example: "US Dollar"
+        currencySymbol:
+          type: string
+          description: "The symbol or sign used to represent the currency. This is typically shown before or after amounts in transactions and displays. Examples: '$' (Dollar), '€' (Euro), '£' (Pound), 'R' (Rand). This is a required field and can be 1-3 characters."
+          example: "$"
+        currencyFlag:
+          type: string
+          description: "Visual representation of the currency's country, typically an emoji flag or country code. This helps users quickly identify the currency's origin. Examples: '🇺🇸' (US), '🇪🇺' (EU), '🇬🇧' (UK), '🇿🇦' (South Africa), or use country codes like 'US', 'EU', 'GB', 'ZA'. This is a required field and aids in visual currency recognition."
+          example: "🇺🇸"
+    BatchCurrencyRequest:
+      type: object
+      description: Batch request for creating multiple currencies in a single operation
+      required:
+      - batchCurrencies
+      properties:
+        batchCurrencies:
+          type: array
+          description: "List of currency objects to be created in batch. Each currency must contain all required fields (currencyId, currencyCode, currencyName, currencySymbol, currencyFlag). The batch operation will create all currencies atomically - if one fails, all fail. Minimum of 1 currency is required, and there is typically a maximum limit (e.g., 100) to prevent excessive load. Use this endpoint when you need to create multiple currencies efficiently in a single request."
+          items:
+            $ref: '#/components/schemas/CurrencyRequest'
+    CurrencyEntityModel:
+      type: object
+      description: Currency entity model representing a stored currency in the system with audit information
+      required:
+      - id
+      - createdBy
+      - createdAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Unique identifier for the entity. Auto-generated primary key."
+          example: "1"
+        currencyId:
+          type: integer
+          format: int32
+          description: "Unique numeric identifier for the currency. This should be the ISO 4217 numeric code. For example: USD=840, EUR=978, GBP=826, ZAR=710. This is a required field and must be a positive integer."
+          example: "840"
+        currencyCode:
+          type: string
+          description: "Three-letter ISO 4217 currency code in uppercase. This is a globally recognized standard for currency identification. Examples: USD (US Dollar), EUR (Euro), GBP (British Pound), ZAR (South African Rand). This is a required field and must be exactly 3 characters."
+          example: "USD"
+        currencyName:
+          type: string
+          description: "Full descriptive name of the currency in English. This is how the currency will be displayed to users. Examples: 'US Dollar', 'Euro', 'British Pound Sterling', 'South African Rand'. This is a required field and should be clear and unambiguous."
+          example: "US Dollar"
+        currencySymbol:
+          type: string
+          description: "The symbol or sign used to represent the currency. This is typically shown before or after amounts in transactions and displays. Examples: '$' (Dollar), '€' (Euro), '£' (Pound), 'R' (Rand). This is a required field and can be 1-3 characters."
+          example: "$"
+        currencyFlag:
+          type: string
+          description: "Visual representation of the currency's country, typically an emoji flag or country code. This helps users quickly identify the currency's origin. Examples: '🇺🇸' (US), '🇪🇺' (EU), '🇬🇧' (UK), '🇿🇦' (South Africa), or use country codes like 'US', 'EU', 'GB', 'ZA'. This is a required field and aids in visual currency recognition."
+          example: "🇺🇸"
+        createdBy:
+          type: integer
+          format: int64
+          description: "User ID of the person who created this record. This is used for audit trail purposes to track who initiated the currency creation. This is a required field and references a user entity in the system."
+          example: "1"
+        createdAt:
+          type: string
+          format: date-time
+          description: "Timestamp when this record was created in the system. This is automatically set by the system when the currency is first created. Uses ISO 8601 format for date-time representation. This is a required field for audit purposes."
+          example: "2024-12-23T00:34:00"
