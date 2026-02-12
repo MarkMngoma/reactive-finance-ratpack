@@ -35,6 +35,7 @@ import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.tags.Tag;
 
 /**
  * Reads an existing OpenAPI YAML spec or creates a new one, then merges
@@ -77,6 +78,30 @@ public class OpenApiSpecWriter {
       }
       if (openAPI.getComponents().getSchemas() == null) {
         openAPI.getComponents().setSchemas(new HashMap<>());
+      }
+      
+      // Collect all unique tags from interactions
+      Map<String, String> allTags = new LinkedHashMap<>();
+      for (CapturedInteraction interaction : interactions) {
+        if (interaction.getAnnotationTags() != null) {
+          for (String tag : interaction.getAnnotationTags()) {
+            if (!allTags.containsKey(tag)) {
+              allTags.put(tag, generateTagDescription(tag));
+            }
+          }
+        }
+      }
+      
+      // Add tags to OpenAPI spec
+      if (!allTags.isEmpty()) {
+        List<Tag> tags = new ArrayList<>();
+        for (Map.Entry<String, String> entry : allTags.entrySet()) {
+          Tag tag = new Tag();
+          tag.setName(entry.getKey());
+          tag.setDescription(entry.getValue());
+          tags.add(tag);
+        }
+        openAPI.setTags(tags);
       }
       
       // Group interactions by normalized path + method
@@ -256,6 +281,31 @@ public class OpenApiSpecWriter {
     String path = interaction.getNormalizedPath();
     
     return method + " " + path;
+  }
+  
+  /**
+   * Generates a description for a tag based on its name.
+   */
+  private String generateTagDescription(String tagName) {
+    // Generate human-readable descriptions for common tag patterns
+    switch (tagName) {
+      case "WriteBatch":
+        return "Batch write operations for creating multiple resources";
+      case "Write":
+        return "Write operations for creating and modifying resources";
+      case "Query":
+        return "Query operations for retrieving resources";
+      case "QueryBatch":
+        return "Batch query operations for retrieving multiple resources";
+      case "Currency":
+        return "Currency resource operations";
+      case "Modification":
+        return "Resource modification operations";
+      case "Examples":
+        return "Example scenarios demonstrating different use cases";
+      default:
+        return tagName + " operations";
+    }
   }
   
   /**
