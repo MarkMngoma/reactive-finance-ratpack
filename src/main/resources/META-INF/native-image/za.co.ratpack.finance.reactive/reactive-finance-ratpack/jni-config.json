@@ -15,21 +15,6 @@
     "methods": []
   },
   {
-    "name": "io.netty.internal.tcnative.SSL",
-    "fields": [],
-    "methods": []
-  },
-  {
-    "name": "io.netty.internal.tcnative.CertificateVerifier",
-    "fields": [],
-    "methods": []
-  },
-  {
-    "name": "io.netty.internal.tcnative.SSLPrivateKeyMethod",
-    "fields": [],
-    "methods": []
-  },
-  {
     "name": "org.mariadb.jdbc.internal.com.send.authentication.gssapi.StandardGssapiAuthentication",
     "fields": [],
     "methods": []
