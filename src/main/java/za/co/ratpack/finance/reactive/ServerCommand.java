@@ -80,9 +80,9 @@ public class ServerCommand {
 
     builder
       .baseDir(BaseDir.find())
-      .env()
-      .sysProps()
       .yaml(ConfigurationResolver.loadDefaultConfigurationPath())
+      .sysProps()
+      .env()
       .require("/server", CustomServerConfig.class)
       .require("/jdbc", JdbcConfig.class)
       .port(config.getDefaultPort());

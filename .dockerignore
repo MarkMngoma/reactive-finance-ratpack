@@ -1,0 +1,23 @@
+# Gradle build outputs and caches
+.gradle/
+build/
+
+# Git metadata
+.git/
+.gitmodules
+
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.vscode/
+.DS_Store
+
+# Test-only resources (not needed in the image)
+src/test/
+
+# CI and shell helpers
+flyway.sh
+.editorconfig

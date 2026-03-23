@@ -1,4 +1,5 @@
 [![Java CI with Gradle](https://github.com/MarkMngoma/reactive-finance-ratpack/actions/workflows/gradle.yml/badge.svg)](https://github.com/MarkMngoma/reactive-finance-ratpack/actions/workflows/gradle.yml)
+[![Docker Image](https://ghcr-badge.egpl.dev/markngoma/reactive-finance-ratpack/latest_tag?trim=major&label=docker)](https://github.com/MarkMngoma/reactive-finance-ratpack/pkgs/container/reactive-finance-ratpack)
 
 # 🏦 **Reactive Ratpack Finance API** 🚀
 
@@ -12,6 +13,8 @@ The API allows you to perform CRUD operations on currency resources, including r
 - **QueryCurrencyResource**: Retrieve currency resources by various filters.
 - **Exchange Rates**: Get the latest exchange rates for different currencies.
 - **Swagger Spec**: Full OpenAPI 3.0 specification to help you integrate smoothly.
+- **Native Image**: Compile to a self-contained native binary with GraalVM for fast startup and low memory usage.
+- **Docker**: Official multi-stage `Dockerfile` and `docker-compose.yml` for running the full stack natively in a container.
 
 ## 📜 API Documentation
 
@@ -425,6 +428,187 @@ The project includes integration tests to ensure that everything is functioning 
 
 - **Description**: Retrieve a specific currency resource by currency code.
 - **Path Parameter**: `currencyCode` (e.g., `ZAR` for South African Rand).
+
+---
+
+## ⚡ Native Image
+
+The project can be compiled to a self-contained native binary using **GraalVM Native Image**. The native binary starts in milliseconds and uses a fraction of the memory compared to the JVM.
+
+### Prerequisites
+
+- [GraalVM Community Edition 17](https://www.graalvm.org/downloads/) with `native-image` installed, **or** use the provided `Dockerfile` which handles the entire build inside Docker.
+
+### Building the Native Binary with Gradle
+
+```bash
+./gradlew nativeCompile
+```
+
+The binary is produced at:
+
+```
+build/native/nativeCompile/reactive-finance-ratpack
+```
+
+### Running the Native Binary
+
+```bash
+export RATPACK_ENVIRONMENT=localhost
+./build/native/nativeCompile/reactive-finance-ratpack
+```
+
+---
+
+## 🐳 Docker — Native Image
+
+The `Dockerfile` at the project root performs a **multi-stage build**:
+
+| Stage | Base Image | Purpose |
+|-------|-----------|---------|
+| `builder` | `ghcr.io/graalvm/native-image-community:17-ol9` | Compiles the native binary |
+| `runtime` | `debian:bookworm-slim` | Minimal image that runs the binary |
+
+### Building the Docker Image Locally
+
+```bash
+docker build -t reactive-finance-ratpack:latest .
+```
+
+### Running the Container Standalone
+
+```bash
+docker run --rm \
+  -p 5051:5051 \
+  -e RATPACK_ENVIRONMENT=docker \
+  -e JDBC__URL=jdbc:mariadb://<db-host>:3306/dboFinance \
+  -e JDBC__USERNAME=dboFinance \
+  -e JDBC__PASSWORD=<password> \
+  reactive-finance-ratpack:latest
+```
+
+### Running the Full Stack with Docker Compose
+
+> The root `docker-compose.yml` starts both the **MariaDB database** and the **native application** together.
+
+1. **Copy the environment template:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Fill in your secrets** in `.env` (especially `MARIADB_PASSWORD` and `JDBC_PASSWORD`).
+
+3. **Start the full stack:**
+
+   ```bash
+   docker compose up --build
+   ```
+
+4. **Start in detached mode:**
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+5. **Shut down:**
+
+   ```bash
+   docker compose down
+   ```
+
+   To also remove the persistent database volume:
+
+   ```bash
+   docker compose down -v
+   ```
+
+The API is available at [http://localhost:5051](http://localhost:5051) once both services are healthy.
+
+---
+
+## 🔧 Environment Variables Reference
+
+All environment variables are documented in [`.env.example`](.env.example).
+
+### Required
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `RATPACK_ENVIRONMENT` | Selects the active config profile. Maps to `application-{value}.yml`. | `docker`, `localhost` |
+
+### Configuration Path
+
+| Variable | Description | Default (Docker) |
+|----------|-------------|-----------------|
+| `CONFIGURATION_PATH` | Directory containing the active YAML config file, relative to the working directory. | `/config/` (set in `Dockerfile`) |
+
+### JDBC Overrides (optional)
+
+These variables use Ratpack's environment-variable config override convention (`__` = path separator, maps to nested YAML keys). They take priority over values in the selected `application-*.yml` file.
+
+| Variable | YAML key | Description |
+|----------|----------|-------------|
+| `JDBC__URL` | `jdbc.url` | Full JDBC connection URL |
+| `JDBC__USERNAME` | `jdbc.username` | Database username |
+| `JDBC__PASSWORD` | `jdbc.password` | Database password |
+
+### Docker Compose Port Overrides (optional)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `APP_PORT` | Host port for the application | `5051` |
+| `DB_EXPOSE_PORT` | Host port for the MariaDB service | `3306` |
+
+### MariaDB (docker-compose only)
+
+| Variable | Description |
+|----------|-------------|
+| `MARIADB_ROOT_PASSWORD` | Root password for the MariaDB instance |
+| `MARIADB_DATABASE` | Database name to create on first start |
+| `MARIADB_USER` | Application database user |
+| `MARIADB_PASSWORD` | Application database password |
+
+### Configuration Profiles
+
+| Profile (`RATPACK_ENVIRONMENT`) | Config File | DB Host | DB Port |
+|---------------------------------|-------------|---------|---------|
+| `localhost` | `application-localhost.yml` | `localhost` | `63306` |
+| `docker` | `application-docker.yml` | `db` (Docker Compose service) | `3306` |
+
+To add a new environment (e.g., `production`), create `src/main/resources/application-production.yml` and set `RATPACK_ENVIRONMENT=production`.
+
+---
+
+## 🖼️ Published Docker Image
+
+The CI pipeline automatically builds the native Docker image on every push to `develop` or `main` and pushes it to the **GitHub Container Registry (GHCR)**. The following tags are applied:
+
+| Tag | Applied when |
+|-----|-------------|
+| `latest` | Push to `main` only |
+| `<branch-name>` | Push to any branch |
+| `<short-sha>` | Every push |
+
+```
+ghcr.io/markngoma/reactive-finance-ratpack:latest
+ghcr.io/markngoma/reactive-finance-ratpack:<branch>
+ghcr.io/markngoma/reactive-finance-ratpack:<short-sha>
+```
+
+Pull and run the published image directly:
+
+```bash
+docker pull ghcr.io/markngoma/reactive-finance-ratpack:latest
+
+docker run --rm \
+  -p 5051:5051 \
+  -e RATPACK_ENVIRONMENT=docker \
+  -e JDBC__URL=jdbc:mariadb://<db-host>:3306/dboFinance \
+  -e JDBC__USERNAME=dboFinance \
+  -e JDBC__PASSWORD=<password> \
+  ghcr.io/markngoma/reactive-finance-ratpack:latest
+```
 
 ---
 
