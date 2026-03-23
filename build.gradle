@@ -18,6 +18,7 @@ plugins {
   id 'java'
   id "application"
   id 'com.github.johnrengelman.shadow' version "${shadowJarVersion}"
+  id 'org.graalvm.buildtools.native' version "${nativeBuildToolsVersion}"
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -115,4 +116,31 @@ shadowJar {
 
 test {
   useJUnitPlatform()
+}
+
+graalvmNative {
+  metadataRepository {
+    enabled = true
+  }
+  agent {
+    enabled = false
+  }
+  binaries {
+    main {
+      imageName = 'reactive-finance-ratpack'
+      mainClass = "${mainClass}"
+      buildArgs.addAll(
+        '--no-fallback',
+        '--enable-url-protocols=http,https',
+        '-H:+ReportExceptionStackTraces',
+        '-H:+AddAllCharsets',
+        '--allow-incomplete-classpath',
+        '--install-exit-handlers',
+        '-march=compatibility'
+      )
+      resources {
+        autodetect()
+      }
+    }
+  }
 }

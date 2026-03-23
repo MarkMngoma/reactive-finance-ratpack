@@ -1,0 +1,9 @@
+[
+  ["za.co.ratpack.finance.reactive.domain.mybatis.dao.CommandCurrencyDao"],
+  ["za.co.ratpack.finance.reactive.domain.mybatis.dao.QueryCurrencyDao"],
+  ["za.co.ratpack.finance.reactive.domain.mybatis.BatchDao"],
+  ["org.apache.ibatis.session.SqlSession"],
+  ["ratpack.error.ClientErrorHandler"],
+  ["ratpack.error.ServerErrorHandler"],
+  ["ratpack.service.Service"]
+]

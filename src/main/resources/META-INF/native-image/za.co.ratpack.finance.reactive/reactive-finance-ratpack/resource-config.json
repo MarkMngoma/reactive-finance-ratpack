@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {"pattern": "application-.*\\.yml"},
+      {"pattern": "logback\\.xml"},
+      {"pattern": "spec\\.yaml"},
+      {"pattern": "\\.ratpack"},
+      {"pattern": "db/migration/.*\\.sql"},
+      {"pattern": "za/co/ratpack/finance/reactive/domain/mybatis/dao/.*\\.xml"},
+      {"pattern": "META-INF/services/.*"},
+      {"pattern": "META-INF/native-image/.*"},
+      {"pattern": "org/apache/ibatis/.*"},
+      {"pattern": "com/zaxxer/hikari/.*\\.properties"},
+      {"pattern": "org/flywaydb/.*"}
+    ]
+  },
+  "bundles": []
+}
