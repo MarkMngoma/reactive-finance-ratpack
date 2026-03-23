@@ -136,7 +136,6 @@ graalvmNative {
         '-H:+ReportExceptionStackTraces',
         '-H:+AddAllCharsets',
         '--allow-incomplete-classpath',
-        '--install-exit-handlers',
         '-march=compatibility'
       )
       resources {
