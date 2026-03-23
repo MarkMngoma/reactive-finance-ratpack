@@ -119,6 +119,7 @@ test {
 }
 
 graalvmNative {
+  toolchainDetection = false
   metadataRepository {
     enabled = true
   }

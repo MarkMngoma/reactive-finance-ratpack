@@ -435,9 +435,33 @@ The project includes integration tests to ensure that everything is functioning 
 
 The project can be compiled to a self-contained native binary using **GraalVM Native Image**. The native binary starts in milliseconds and uses a fraction of the memory compared to the JVM.
 
+> **Toolchain note** — The build uses `toolchainDetection = false`, which means the Gradle plugin always compiles with the **currently-active JDK**. You must therefore set `JAVA_HOME` (or the PATH) to a GraalVM distribution before running `nativeCompile`. If you run `nativeCompile` with a regular JDK (e.g. Eclipse Temurin) you will get a clear error:
+> ```
+> /path/to/bin/native-image wasn't found. This probably means that JDK isn't a GraalVM distribution.
+> ```
+> In CI this is handled automatically by the `graalvm/setup-graalvm@v1` action.
+
 ### Prerequisites
 
 - [GraalVM Community Edition 17](https://www.graalvm.org/downloads/) with `native-image` installed, **or** use the provided `Dockerfile` which handles the entire build inside Docker.
+
+#### Quick local install (SDKMAN)
+
+```bash
+sdk install java 17.0.9-graalce
+sdk use java 17.0.9-graalce
+native-image --version   # verify
+```
+
+#### Quick local install (GitHub Releases)
+
+Download GraalVM CE 17 from <https://github.com/graalvm/graalvm-ce-builds/releases>, extract it, and point `JAVA_HOME` at the extracted directory:
+
+```bash
+export JAVA_HOME=/path/to/graalvm-community-openjdk-17
+export PATH=$JAVA_HOME/bin:$PATH
+native-image --version   # verify
+```
 
 ### Building the Native Binary with Gradle
 
