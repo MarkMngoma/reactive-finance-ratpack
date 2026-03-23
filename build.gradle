@@ -129,7 +129,7 @@ graalvmNative {
   binaries {
     main {
       imageName = 'reactive-finance-ratpack'
-      mainClass = "${mainClass}"
+      mainClass = javaMainClass
       buildArgs.addAll(
         '--no-fallback',
         '--enable-url-protocols=http,https',
