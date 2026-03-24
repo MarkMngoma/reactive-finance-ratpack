@@ -197,6 +197,34 @@
     "allPublicMethods": true
   },
   {
+    "name": "za.co.ratpack.finance.reactive.guice.providers.MDCInterceptorProvider",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "za.co.ratpack.finance.reactive.guice.providers.ValidatorProvider",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "za.co.ratpack.finance.reactive.guice.providers.ModelMapperProvider",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "za.co.ratpack.finance.reactive.guice.providers.ObjectMapperProvider",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
     "name": "za.co.ratpack.finance.reactive.functions.handlers.GlobalErrorHandler",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
