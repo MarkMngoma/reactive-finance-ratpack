@@ -26,15 +26,13 @@ public class WriteBatchCurrencyResourceHandler implements Handler {
   private final HttpContentHelper httpContentHelper;
   private final BatchCommandDomainExecutorFunction batchCommandDomainExecutorFunction;
   private final ThrowableHandler throwableHandler;
-  private final CommandCurrencyDao commandCurrencyDao;
   private final BatchObjectMapper<CurrencyEntityModel, CurrencyRequest> batchObjectMapper;
 
   @Inject
-  public WriteBatchCurrencyResourceHandler(HttpContentHelper httpContentHelper, BatchCommandDomainExecutorFunction batchCommandDomainExecutorFunction, ThrowableHandler throwableHandler, CommandCurrencyDao commandCurrencyDao, BatchObjectMapper<CurrencyEntityModel, CurrencyRequest> batchObjectMapper) {
+  public WriteBatchCurrencyResourceHandler(HttpContentHelper httpContentHelper, BatchCommandDomainExecutorFunction batchCommandDomainExecutorFunction, ThrowableHandler throwableHandler, BatchObjectMapper<CurrencyEntityModel, CurrencyRequest> batchObjectMapper) {
     this.httpContentHelper = httpContentHelper;
     this.batchCommandDomainExecutorFunction = batchCommandDomainExecutorFunction;
     this.throwableHandler = throwableHandler;
-    this.commandCurrencyDao = commandCurrencyDao;
     this.batchObjectMapper = batchObjectMapper;
   }
 
@@ -44,7 +42,8 @@ public class WriteBatchCurrencyResourceHandler implements Handler {
     this.httpContentHelper.parseJson(ctx, BatchCurrencyRequest.class)
       .apply(batchCurrencyRequestPromise -> this.httpContentHelper.validate(ctx, batchCurrencyRequestPromise))
       .map(batchCurrencyRequest -> batchObjectMapper.apply(batchCurrencyRequest.getBatchCurrencies(), CurrencyEntityModel.class))
-      .blockingOp(currencyEntityModels -> this.batchCommandDomainExecutorFunction.executeBatchCommand(commandCurrencyDao::insert, commandCurrencyDao, currencyEntityModels))
+      .blockingOp(currencyEntityModels -> this.batchCommandDomainExecutorFunction.executeBatchCommand(
+        CommandCurrencyDao.class, CommandCurrencyDao::insert, currencyEntityModels))
       .onError(throwable -> this.throwableHandler.handle(ctx, throwable, Status.UNPROCESSABLE_ENTITY, "Failed to create currencies"))
       .then(batchResult -> ctx.insert(ctx.get(QueryBatchCurrencyResourceHandler.class)));
   }

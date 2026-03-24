@@ -71,7 +71,6 @@ dependencies {
 
   // Domain Dependencies
   implementation "org.mybatis:mybatis:${myBatisVersion}"
-  implementation "org.mybatis:mybatis-guice:${myBatisGuiceVersion}"
   implementation "org.mybatis.caches:mybatis-hazelcast:${myBatisHazelcastVersion}"
   implementation "com.zaxxer:HikariCP:${hikariCPVersion}"
   implementation "org.mariadb.jdbc:mariadb-java-client:${jdbcMariadbVersion}"

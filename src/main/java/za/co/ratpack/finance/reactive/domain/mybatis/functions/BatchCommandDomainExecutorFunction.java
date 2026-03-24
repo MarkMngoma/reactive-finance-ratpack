@@ -1,21 +1,20 @@
 package za.co.ratpack.finance.reactive.domain.mybatis.functions;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.ibatis.executor.BatchResult;
-import org.apache.ibatis.session.ExecutorType;
-import org.mybatis.guice.transactional.Isolation;
-import org.mybatis.guice.transactional.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import za.co.ratpack.finance.reactive.domain.mybatis.BatchDao;
+import za.co.ratpack.finance.reactive.domain.mybatis.SqlSessionTemplate;
 
 import java.sql.SQLDataException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
 /**
  * @author markmngoma
@@ -26,8 +25,36 @@ public class BatchCommandDomainExecutorFunction {
 
   private static final Logger LOG = LoggerFactory.getLogger(BatchCommandDomainExecutorFunction.class);
 
-  @Transactional(executorType = ExecutorType.BATCH, isolation = Isolation.READ_UNCOMMITTED, rollbackOnly = true)
-  public <T, R extends BatchDao> void executeBatchCommand(final Function<T, ?> mapperFunction, final R mapperInstance, final Collection<T> batchEntries) throws SQLDataException {
+  private final SqlSessionTemplate sessionTemplate;
+
+  @Inject
+  public BatchCommandDomainExecutorFunction(SqlSessionTemplate sessionTemplate) {
+    this.sessionTemplate = sessionTemplate;
+  }
+
+  /**
+   * Executes a batch database command within a programmatic
+   * {@link org.apache.ibatis.session.ExecutorType#BATCH} transaction.
+   *
+   * <p>A dedicated {@link org.apache.ibatis.session.SqlSession} is opened for the
+   * entire call; all {@code batchEntries} are processed, statements are flushed and
+   * committed (or rolled back on error) before the session is closed
+   * automatically via try-with-resources — replacing the previous mybatis-guice
+   * {@code @Transactional} AOP interceptor approach.
+   *
+   * @param mapperClass    the MyBatis mapper interface class,
+   *                       e.g. {@code CommandCurrencyDao.class}
+   * @param mapperFunction an <em>unbound</em> method reference that writes a
+   *                       single entry, e.g. {@code CommandCurrencyDao::insert}
+   * @param batchEntries   the collection of entries to persist
+   * @param <T>            the entry type
+   * @param <M>            the mapper type — must extend {@link BatchDao}
+   * @throws SQLDataException if validation fails or an error occurs during execution
+   */
+  public <T, M extends BatchDao> void executeBatchCommand(
+      final Class<M> mapperClass,
+      final BiConsumer<M, T> mapperFunction,
+      final Collection<T> batchEntries) throws SQLDataException {
     LOG.info("BatchCommandDomainExecutorFunction@executeBatchCommand executed for #{} entries", batchEntries.size());
     try {
       MDC.setContextMap(MDC.getCopyOfContextMap());
@@ -35,37 +62,30 @@ public class BatchCommandDomainExecutorFunction {
       if (mapperFunction == null) {
         throw new SQLDataException("BatchCommandDomainExecutorFunction@executeBatchCommand mapper function not supplied.");
       }
-      if (mapperInstance == null) {
-        throw new SQLDataException("BatchCommandDomainExecutorFunction@executeBatchCommand mapper instance not located or supplied.");
+      if (batchEntries == null || batchEntries.isEmpty()) {
+        throw new SQLDataException("BatchCommandDomainExecutorFunction@executeBatchCommand no batch entries supplied.");
       }
 
-      int counter = 0;
       StopWatch stopwatch = new StopWatch();
 
       if (LOG.isInfoEnabled()) {
         stopwatch.start();
       }
 
-      for (T entry : batchEntries) {
-        mapperFunction.apply(entry);
+      List<BatchResult> results = sessionTemplate.executeBatch(mapperClass, batchEntries, mapperFunction);
 
-        if (LOG.isDebugEnabled() && ++counter % 100 == 0) {
-          LOG.debug("BatchCommandDomainExecutorFunction@executeBatchCommand {} records processed for {}", counter, mapperFunction.toString());
-        }
-      }
-
-      List<BatchResult> results = mapperInstance.flushBatchedStatements();
-      LOG.debug("BatchCommandDomainExecutorFunction@executeBatchCommand {} records processed for {} batch result :: {}", counter, mapperFunction.toString(), results);
+      LOG.debug("BatchCommandDomainExecutorFunction@executeBatchCommand batch result :: {}", results);
 
       if (LOG.isInfoEnabled()) {
         stopwatch.stop();
-        LOG.info("[{}] ms and [{}] seconds for BATCH {}", stopwatch.getTime(TimeUnit.MILLISECONDS), stopwatch.getTime(TimeUnit.SECONDS), mapperFunction.toString());
+        LOG.info("[{}] ms and [{}] seconds for BATCH {}", stopwatch.getTime(TimeUnit.MILLISECONDS), stopwatch.getTime(TimeUnit.SECONDS), mapperClass.getSimpleName());
       }
 
+    } catch (SQLDataException e) {
+      throw e;
     } catch (Exception e) {
-      LOG.error("BatchCommandDomainExecutorFunction@executeBatchCommand call {} failed {}", mapperFunction, e.getMessage());
+      LOG.error("BatchCommandDomainExecutorFunction@executeBatchCommand call {} failed {}", mapperClass.getSimpleName(), e.getMessage());
       throw new SQLDataException(e.getMessage());
     }
   }
-
 }

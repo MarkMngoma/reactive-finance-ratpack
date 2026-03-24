@@ -131,12 +131,33 @@
     "allPublicMethods": true
   },
   {
+    "name": "za.co.ratpack.finance.reactive.domain.mybatis.dao.DefaultCommandCurrencyDao",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
     "name": "za.co.ratpack.finance.reactive.domain.mybatis.dao.QueryCurrencyDao",
     "allDeclaredMethods": true,
     "allPublicMethods": true
   },
   {
+    "name": "za.co.ratpack.finance.reactive.domain.mybatis.dao.DefaultQueryCurrencyDao",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
     "name": "za.co.ratpack.finance.reactive.domain.mybatis.BatchDao",
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "za.co.ratpack.finance.reactive.domain.mybatis.SqlSessionTemplate",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
     "allDeclaredMethods": true,
     "allPublicMethods": true
   },
@@ -500,35 +521,6 @@
   },
   {
     "name": "org.apache.ibatis.logging.slf4j.Slf4jLoggerImpl",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true
-  },
-  {
-    "name": "org.mybatis.guice.datasource.hikaricp.HikariCPProvider",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true,
-    "allDeclaredFields": true
-  },
-  {
-    "name": "org.mybatis.guice.datasource.builtin.UnpooledDataSourceProvider",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true
-  },
-  {
-    "name": "org.mybatis.guice.datasource.builtin.PooledDataSourceProvider",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true
-  },
-  {
-    "name": "org.mybatis.guice.datasource.helper.JdbcHelper",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
