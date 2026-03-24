@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.Location;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
-import org.mybatis.guice.datasource.builtin.UnpooledDataSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -29,8 +28,8 @@ public class FlywayMigratorService implements Service {
   private final DataSource dataSource;
 
   @Inject
-  public FlywayMigratorService(UnpooledDataSourceProvider unpooledDataSourceProvider) {
-    this.dataSource = unpooledDataSourceProvider.get();
+  public FlywayMigratorService(DataSource dataSource) {
+    this.dataSource = dataSource;
   }
 
   @Override

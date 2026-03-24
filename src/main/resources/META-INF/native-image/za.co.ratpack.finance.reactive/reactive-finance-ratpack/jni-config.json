@@ -1,0 +1,22 @@
+[
+  {
+    "name": "io.netty.channel.epoll.Native",
+    "fields": [],
+    "methods": []
+  },
+  {
+    "name": "io.netty.channel.epoll.EpollEventLoop",
+    "fields": [],
+    "methods": []
+  },
+  {
+    "name": "io.netty.channel.kqueue.Native",
+    "fields": [],
+    "methods": []
+  },
+  {
+    "name": "org.mariadb.jdbc.internal.com.send.authentication.gssapi.StandardGssapiAuthentication",
+    "fields": [],
+    "methods": []
+  }
+]

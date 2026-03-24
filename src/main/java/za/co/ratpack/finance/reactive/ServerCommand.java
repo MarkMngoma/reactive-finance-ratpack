@@ -11,7 +11,6 @@ import ratpack.handling.Chain;
 import ratpack.handling.RequestLogger;
 import ratpack.health.HealthCheck;
 import ratpack.registry.Registry;
-import ratpack.server.BaseDir;
 import ratpack.server.RatpackServer;
 import ratpack.server.ServerConfigBuilder;
 import za.co.ratpack.finance.reactive.config.CustomServerConfig;
@@ -23,6 +22,7 @@ import za.co.ratpack.finance.reactive.guice.modules.HikariMyBatisModule;
 import za.co.ratpack.finance.reactive.guice.modules.ServerModule;
 import za.co.ratpack.finance.reactive.rest.v1.action.FinanceActionChain;
 
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import static za.co.ratpack.finance.reactive.HttpServer.SERVER_ENVIRONMENT;
@@ -79,10 +79,10 @@ public class ServerCommand {
     }
 
     builder
-      .baseDir(BaseDir.find())
-      .env()
-      .sysProps()
+      .baseDir(Paths.get(System.getProperty("user.dir")))
       .yaml(ConfigurationResolver.loadDefaultConfigurationPath())
+      .sysProps()
+      .env()
       .require("/server", CustomServerConfig.class)
       .require("/jdbc", JdbcConfig.class)
       .port(config.getDefaultPort());

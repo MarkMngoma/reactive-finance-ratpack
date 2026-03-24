@@ -18,12 +18,16 @@ plugins {
   id 'java'
   id "application"
   id 'com.github.johnrengelman.shadow' version "${shadowJarVersion}"
+  id 'org.graalvm.buildtools.native' version "${nativeBuildToolsVersion}"
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: "java"
 apply plugin: 'application'
-apply from: "${projectDir}/src/gradle/scripts/mybatis.gradle"
+def mybatisScript = file("${projectDir}/src/gradle/scripts/mybatis.gradle")
+if (mybatisScript.exists()) {
+  apply from: mybatisScript
+}
 
 group = 'za.co.ratpack.finance.reactive'
 description = 'A Java boilerplate reactive financial server using Google Guice'
@@ -40,7 +44,6 @@ dependencies {
   // Server Dependencies
   implementation "io.ratpack:ratpack-core:${ratpackVersion}"
   implementation "io.ratpack:ratpack-guice:${ratpackVersion}"
-  implementation "com.google.inject:guice:${googleGuiceVersion}"
   implementation "io.netty:netty-all:${nettyVersion}"
 
   // Logback Dependencies
@@ -68,7 +71,6 @@ dependencies {
 
   // Domain Dependencies
   implementation "org.mybatis:mybatis:${myBatisVersion}"
-  implementation "org.mybatis:mybatis-guice:${myBatisGuiceVersion}"
   implementation "org.mybatis.caches:mybatis-hazelcast:${myBatisHazelcastVersion}"
   implementation "com.zaxxer:HikariCP:${hikariCPVersion}"
   implementation "org.mariadb.jdbc:mariadb-java-client:${jdbcMariadbVersion}"
@@ -115,4 +117,31 @@ shadowJar {
 
 test {
   useJUnitPlatform()
+}
+
+graalvmNative {
+  toolchainDetection = false
+  metadataRepository {
+    enabled = true
+  }
+  agent {
+    enabled = false
+  }
+  binaries {
+    main {
+      imageName = 'reactive-finance-ratpack'
+      mainClass = javaMainClass
+      buildArgs.addAll(
+        '--no-fallback',
+        '--enable-url-protocols=http,https',
+        '-H:+ReportExceptionStackTraces',
+        '-H:+AddAllCharsets',
+        '--allow-incomplete-classpath',
+        '-march=compatibility'
+      )
+      resources {
+        autodetect()
+      }
+    }
+  }
 }
