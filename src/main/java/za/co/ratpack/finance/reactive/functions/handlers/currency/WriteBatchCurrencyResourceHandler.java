@@ -7,7 +7,7 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 import ratpack.http.Status;
 import za.co.ratpack.finance.reactive.domain.mybatis.dao.CommandCurrencyDao;
-import za.co.ratpack.finance.reactive.domain.mybatis.functions.BatchCommandDomainExecutorFunction;
+import za.co.ratpack.finance.reactive.domain.mybatis.BatchCommandDomainExecutor;
 import za.co.ratpack.finance.reactive.domain.mybatis.model.CurrencyEntityModel;
 import za.co.ratpack.finance.reactive.domain.mybatis.model.mapper.BatchObjectMapper;
 import za.co.ratpack.finance.reactive.functions.handlers.ThrowableHandler;
@@ -24,14 +24,14 @@ import za.co.ratpack.finance.reactive.rest.v1.dto.CurrencyRequest;
 public class WriteBatchCurrencyResourceHandler implements Handler {
 
   private final HttpContentHelper httpContentHelper;
-  private final BatchCommandDomainExecutorFunction batchCommandDomainExecutorFunction;
+  private final BatchCommandDomainExecutor batchCommandDomainExecutor;
   private final ThrowableHandler throwableHandler;
   private final BatchObjectMapper<CurrencyEntityModel, CurrencyRequest> batchObjectMapper;
 
   @Inject
-  public WriteBatchCurrencyResourceHandler(HttpContentHelper httpContentHelper, BatchCommandDomainExecutorFunction batchCommandDomainExecutorFunction, ThrowableHandler throwableHandler, BatchObjectMapper<CurrencyEntityModel, CurrencyRequest> batchObjectMapper) {
+  public WriteBatchCurrencyResourceHandler(HttpContentHelper httpContentHelper, BatchCommandDomainExecutor batchCommandDomainExecutor, ThrowableHandler throwableHandler, BatchObjectMapper<CurrencyEntityModel, CurrencyRequest> batchObjectMapper) {
     this.httpContentHelper = httpContentHelper;
-    this.batchCommandDomainExecutorFunction = batchCommandDomainExecutorFunction;
+    this.batchCommandDomainExecutor = batchCommandDomainExecutor;
     this.throwableHandler = throwableHandler;
     this.batchObjectMapper = batchObjectMapper;
   }
@@ -42,7 +42,7 @@ public class WriteBatchCurrencyResourceHandler implements Handler {
     this.httpContentHelper.parseJson(ctx, BatchCurrencyRequest.class)
       .apply(batchCurrencyRequestPromise -> this.httpContentHelper.validate(ctx, batchCurrencyRequestPromise))
       .map(batchCurrencyRequest -> batchObjectMapper.apply(batchCurrencyRequest.getBatchCurrencies(), CurrencyEntityModel.class))
-      .blockingOp(currencyEntityModels -> this.batchCommandDomainExecutorFunction.executeBatchCommand(
+      .blockingOp(currencyEntityModels -> this.batchCommandDomainExecutor.executeBatchCommand(
         CommandCurrencyDao.class, CommandCurrencyDao::insert, currencyEntityModels))
       .onError(throwable -> this.throwableHandler.handle(ctx, throwable, Status.UNPROCESSABLE_ENTITY, "Failed to create currencies"))
       .then(batchResult -> ctx.insert(ctx.get(QueryBatchCurrencyResourceHandler.class)));

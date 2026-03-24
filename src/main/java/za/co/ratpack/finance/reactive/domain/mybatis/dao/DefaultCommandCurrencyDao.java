@@ -18,7 +18,7 @@ import java.util.List;
  *
  * <p><strong>Batch inserts/updates</strong> must <em>not</em> go through this class.
  * Use
- * {@link za.co.ratpack.finance.reactive.domain.mybatis.functions.BatchCommandDomainExecutorFunction}
+ * {@link za.co.ratpack.finance.reactive.domain.mybatis.BatchCommandDomainExecutor}
  * which manages a {@link org.apache.ibatis.session.ExecutorType#BATCH} session
  * across an entire collection of records.
  *
@@ -49,7 +49,7 @@ public class DefaultCommandCurrencyDao implements CommandCurrencyDao {
   /**
    * Not supported on the per-operation singleton. Batch flushing is handled
    * internally by {@link SqlSessionTemplate#executeBatch} inside
-   * {@code BatchCommandDomainExecutorFunction}.
+   * {@code BatchCommandDomainExecutor}.
    *
    * @throws UnsupportedOperationException always
    */
@@ -57,6 +57,6 @@ public class DefaultCommandCurrencyDao implements CommandCurrencyDao {
   public List<BatchResult> flushBatchedStatements() {
     throw new UnsupportedOperationException(
       "flushBatchedStatements() is only valid inside a BATCH session. " +
-      "Use BatchCommandDomainExecutorFunction for batch operations.");
+      "Use BatchCommandDomainExecutor for batch operations.");
   }
 }

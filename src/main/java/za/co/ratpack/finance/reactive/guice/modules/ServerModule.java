@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import ratpack.error.ClientErrorHandler;
 import ratpack.error.ServerErrorHandler;
 import ratpack.logging.MDCInterceptor;
+import za.co.ratpack.finance.reactive.domain.mybatis.BatchCommandDomainExecutor;
 import za.co.ratpack.finance.reactive.domain.flyway.FlywayMigratorService;
 import za.co.ratpack.finance.reactive.functions.handlers.GlobalErrorHandler;
 import za.co.ratpack.finance.reactive.guice.providers.MDCInterceptorProvider;
@@ -41,6 +42,7 @@ public class ServerModule extends AbstractModule {
 
     bind(FlywayMigratorService.class);
     bind(FinanceActionChain.class);
+    bind(BatchCommandDomainExecutor.class);
 
     bind(MDCInterceptor.class).toProvider(MDCInterceptorProvider.class).in(Scopes.SINGLETON);
     bind(Validator.class).toProvider(ValidatorProvider.class).in(Scopes.SINGLETON);

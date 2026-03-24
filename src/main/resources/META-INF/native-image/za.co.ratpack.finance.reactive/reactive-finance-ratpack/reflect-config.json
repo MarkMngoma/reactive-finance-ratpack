@@ -155,6 +155,13 @@
     "allPublicMethods": true
   },
   {
+    "name": "za.co.ratpack.finance.reactive.domain.mybatis.BatchCommandDomainExecutor",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
     "name": "za.co.ratpack.finance.reactive.domain.mybatis.SqlSessionTemplate",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
