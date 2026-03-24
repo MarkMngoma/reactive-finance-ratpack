@@ -7,13 +7,13 @@ import org.apache.ibatis.io.DefaultVFS;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.mybatis.guice.MyBatisModule;
-import org.mybatis.guice.datasource.builtin.PooledDataSourceProvider;
-import org.mybatis.guice.datasource.helper.JdbcHelper;
 import org.mybatis.guice.datasource.hikaricp.HikariCPProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import za.co.ratpack.finance.reactive.ConfigurationResolver;
 import za.co.ratpack.finance.reactive.config.JdbcConfig;
+import za.co.ratpack.finance.reactive.domain.mybatis.dao.CommandCurrencyDao;
+import za.co.ratpack.finance.reactive.domain.mybatis.dao.QueryCurrencyDao;
 
 import java.util.Properties;
 
@@ -37,7 +37,8 @@ public class HikariMyBatisModule extends MyBatisModule {
     bindTransactionFactoryType(JdbcTransactionFactory.class);
     JdbcConfig jdbcConfig = ConfigurationResolver.loadConfiguration("/jdbc", JdbcConfig.class);
     Names.bindProperties(binder(), properties(jdbcConfig));
-    addMapperClasses(jdbcConfig.getMapperPackage());
+    addMapperClass(CommandCurrencyDao.class);
+    addMapperClass(QueryCurrencyDao.class);
     mapUnderscoreToCamelCase(true);
   }
 
