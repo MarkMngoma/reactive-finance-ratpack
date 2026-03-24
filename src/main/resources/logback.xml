@@ -8,15 +8,8 @@
     </encoder>
   </appender>
 
-  <appender name="asyncConsole" class="ch.qos.logback.classic.AsyncAppender">
-    <appender-ref ref="console" />
-    <queueSize>512</queueSize>
-    <discardingThreshold>0</discardingThreshold>
-    <neverBlock>true</neverBlock>
-  </appender>
-
   <root level="INFO">
-    <appender-ref ref="asyncConsole" />
+    <appender-ref ref="console" />
   </root>
 
   <logger name="com.ibatis" level="TRACE" additivity="true" />
