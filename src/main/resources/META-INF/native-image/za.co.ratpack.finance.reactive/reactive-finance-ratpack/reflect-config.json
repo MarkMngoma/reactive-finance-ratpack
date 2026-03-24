@@ -372,6 +372,11 @@
     "allPublicMethods": true
   },
   {
+    "name": "org.apache.ibatis.io.DefaultVFS",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true
+  },
+  {
     "name": "org.apache.ibatis.session.SqlSessionFactory",
     "allDeclaredMethods": true,
     "allPublicMethods": true

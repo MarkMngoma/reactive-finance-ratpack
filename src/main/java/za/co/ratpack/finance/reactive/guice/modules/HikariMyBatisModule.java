@@ -3,6 +3,8 @@ package za.co.ratpack.finance.reactive.guice.modules;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+import org.apache.ibatis.io.DefaultVFS;
+import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.mybatis.guice.MyBatisModule;
 import org.mybatis.guice.datasource.builtin.PooledDataSourceProvider;
@@ -29,6 +31,7 @@ public class HikariMyBatisModule extends MyBatisModule {
 
   @Override
   protected void initialize() {
+    VFS.addImplClass(DefaultVFS.class);
     initialiseJdbcDriver();
     bindDataSourceProviderType(HikariCPProvider.class);
     bindTransactionFactoryType(JdbcTransactionFactory.class);
