@@ -24,7 +24,10 @@ plugins {
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: "java"
 apply plugin: 'application'
-apply from: "${projectDir}/src/gradle/scripts/mybatis.gradle"
+def mybatisScript = file("${projectDir}/src/gradle/scripts/mybatis.gradle")
+if (mybatisScript.exists()) {
+  apply from: mybatisScript
+}
 
 group = 'za.co.ratpack.finance.reactive'
 description = 'A Java boilerplate reactive financial server using Google Guice'
@@ -41,7 +44,6 @@ dependencies {
   // Server Dependencies
   implementation "io.ratpack:ratpack-core:${ratpackVersion}"
   implementation "io.ratpack:ratpack-guice:${ratpackVersion}"
-  implementation "com.google.inject:guice:${googleGuiceVersion}"
   implementation "io.netty:netty-all:${nettyVersion}"
 
   // Logback Dependencies
