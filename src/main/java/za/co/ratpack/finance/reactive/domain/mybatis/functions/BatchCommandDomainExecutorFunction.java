@@ -59,6 +59,9 @@ public class BatchCommandDomainExecutorFunction {
     try {
       MDC.setContextMap(MDC.getCopyOfContextMap());
 
+      if (mapperClass == null) {
+        throw new SQLDataException("BatchCommandDomainExecutorFunction@executeBatchCommand mapper class not supplied.");
+      }
       if (mapperFunction == null) {
         throw new SQLDataException("BatchCommandDomainExecutorFunction@executeBatchCommand mapper function not supplied.");
       }
